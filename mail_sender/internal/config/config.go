@@ -16,6 +16,7 @@ type Config struct {
 	LogLevel     string `toml:"log_level"`
 	MDType       string `toml:"md_type"`
 	MailBodyPath string `toml:"body_template_path"`
+	BrokerType   string `toml:"broker_type"`
 	BrokerURL    string `toml:"broker_url"`
 }
 

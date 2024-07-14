@@ -35,7 +35,9 @@ func Start(cfg *config.Config) error {
 		return err
 	}
 
-	client, err := setBrokerClient(cfg.)
+	ctx := context.Background()
+
+	client, err := setBrokerClient(cfg.BrokerType, cfg.BrokerURL, ctx)
 	if err != nil {
 		return err
 	}
@@ -91,13 +93,13 @@ func setBrokerClient(name, URL string, ctx context.Context) (brokerclient.Client
 	return nil, ErrUnknownBC
 }
 
-func newServer(log *logrus.Logger, MD maildealer.MailDealer, client brokerclient.Client) *server {
+func newServer(log *logrus.Logger, MD maildealer.MailDealer, client brokerclient.Client, ctx context.Context) *server {
 	srv := server{
 		md:     MD,
 		bc:     client,
 		logger: log,
 
-		ctx: context.Background(),
+		ctx: ctx,
 	}
 	return &srv
 }

@@ -1,19 +1,35 @@
 package rabbitclient
 
-import "github.com/rabbitmq/amqp091-go"
+import (
+	"context"
+
+	"github.com/rabbitmq/amqp091-go"
+)
 
 type Client struct {
+	// Connection params
 	conn *amqp091.Connection
-	ch   *amqp091.Channel
-	q    *amqp091.Queue
+
+	// Connection chanel params
+	ch *amqp091.Channel
+
+	// Connection queue params
+	q *amqp091.Queue
+
+	// Messages params
 	msgs <-chan amqp091.Delivery
+
+	// Async params
+	notifyCloseChan chan *amqp091.Error
+	ctx             context.Context
 }
 
-func New(URL string) (*Client, error) {
+func New(URL string, ctx context.Context) (*Client, error) {
 	conn, err := amqp091.Dial(URL)
 	if err != nil {
 		return nil, err
 	}
+	notifyChan := conn.NotifyClose(make(chan *amqp091.Error))
 
 	ch, err := conn.Channel()
 	if err != nil {
@@ -50,6 +66,9 @@ func New(URL string) (*Client, error) {
 		ch:   ch,
 		q:    &q,
 		msgs: msgs,
+
+		ctx:             ctx,
+		notifyCloseChan: notifyChan,
 	}, nil
 }
 
@@ -63,6 +82,16 @@ func (c *Client) GetMessages() <-chan string {
 func (c *Client) messagesConvertor(res chan string) {
 	defer close(res)
 	for ms := range c.msgs {
-		res <- string(ms.Body)
+		select {
+		case <-c.ctx.Done():
+			c.conn.Close()
+			c.ch.Close()
+			return
+		case <-c.notifyCloseChan:
+			c.ch.Close()
+			return
+		default:
+			res <- string(ms.Body)
+		}
 	}
 }
