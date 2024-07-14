@@ -1,8 +1,8 @@
 version: '3.8'
 services:
-  db:
+  database:
     image: postgres
-    hostname: db
+    hostname: database
     environment:
       POSTGRES_USER: postgres
       POSTGRES_PASSWORD: postgres
@@ -20,7 +20,7 @@ services:
   app:
     build: .
     depends_on:
-      db:
+      database:
         condition: service_healthy
     hostname: app
     environment:
