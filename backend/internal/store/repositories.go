@@ -27,7 +27,7 @@ type FilmRepository interface {
 	Delete(int) (int, error)
 	Overwright(*film.Film) error
 	FindByNamePart(string) (*film.Film, error)
-	FindAndSort(string) ([]*film.Film, error)
+	FindAndSort(string, int) ([]*film.Film, error)
 }
 
 type FilmActorRepository interface {

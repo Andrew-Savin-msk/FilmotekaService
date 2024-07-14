@@ -120,17 +120,18 @@ func (f *FilmRepository) FindByNamePart(namePart string) (*film.Film, error) {
 	return film, nil
 }
 
-func (f *FilmRepository) FindAndSort(field string) ([]*film.Film, error) {
+func (f *FilmRepository) FindAndSort(field string, amount int) ([]*film.Film, error) {
 	films := []*film.Film{}
-	if field != "name" || field != "release_date" || field != "assesment" {
+	if field != "name" && field != "release_date" && field != "assesment" {
 		return films, store.ErrForbiddenParameters
 	}
 
 	rows, err := f.st.db.Query(
 		"SELECT id, name, description, release_date, assesment FROM films "+
 			"ORDER BY $1 DESC "+
-			"LIMIT 5",
+			"LIMIT $2",
 		field,
+		amount,
 	)
 
 	if err != nil {
