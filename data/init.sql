@@ -72,4 +72,18 @@ INSERT INTO actors (gender, birthdate, name) VALUES
 INSERT INTO films_actors (film_id, actor_id) VALUES 
 (1, 2),
 (2, 1),
-(3, 3);
+(3, 3),
+(4, 1),
+(4, 5),
+(4, 6),
+(5, 7),
+(6, 3),
+(7, 8),
+(7, 1),
+(7, 4),
+(8, 9),
+(9, 1),
+(10, 7),
+(11, 5),
+(11, 1),
+(11, 2);
