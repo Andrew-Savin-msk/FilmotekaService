@@ -1,5 +1,5 @@
 package maildealer
 
 type MailDealer interface {
-	Send([]string) ([]string, error)
+	Send(string) error
 }

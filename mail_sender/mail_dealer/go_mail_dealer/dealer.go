@@ -18,17 +18,14 @@ func New(host string, port int, login, password string, mailBody string) *Dealer
 	}
 }
 
-func (d *Dealer) Send(recipients []string) ([]string, error) {
-	unsended := []string{}
-	for _, recepient := range recipients {
-		mess := gomail.NewMessage()
-		mess.SetHeader("Subject", "Welcome to Our Service!")
-		mess.SetBody("text/html", strings.ReplaceAll(string(d.mail_body), "[USER_NAME]", d.md.Username))
-		mess.SetAddressHeader("To", recepient, recepient)
-		err := d.md.DialAndSend(mess)
-		if err != nil {
-			unsended = append(unsended, recepient)
-		}
+func (d *Dealer) Send(recepient string) error {
+	mess := gomail.NewMessage()
+	mess.SetHeader("Subject", "Welcome to Our Service!")
+	mess.SetBody("text/html", strings.ReplaceAll(string(d.mail_body), "[USER_NAME]", d.md.Username))
+	mess.SetAddressHeader("To", recepient, recepient)
+	err := d.md.DialAndSend(mess)
+	if err != nil {
+		return err
 	}
-	return unsended, nil
+	return nil
 }

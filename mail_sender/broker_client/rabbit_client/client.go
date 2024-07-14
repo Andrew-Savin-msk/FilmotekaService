@@ -29,6 +29,7 @@ func New(URL string, ctx context.Context) (*Client, error) {
 	if err != nil {
 		return nil, err
 	}
+
 	notifyChan := conn.NotifyClose(make(chan *amqp091.Error))
 
 	ch, err := conn.Channel()
@@ -90,8 +91,7 @@ func (c *Client) messagesConvertor(res chan string) {
 		case <-c.notifyCloseChan:
 			c.ch.Close()
 			return
-		default:
-			res <- string(ms.Body)
+		case res <- string(ms.Body):
 		}
 	}
 }
