@@ -1,0 +1,3 @@
+*.drawio
+/migrations_draft
+/configs/server.toml
