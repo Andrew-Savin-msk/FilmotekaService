@@ -1,0 +1,32 @@
+version: '3.8'
+services:
+  # front:
+  back:
+    build: ./backend
+    environment:
+      CONFIG_PATH_DOCKER: configs/server_docker.toml
+    hostname: backend
+    depends_on:
+      database:
+          condition: service_healthy
+    ports:
+      - 8081:8081
+  database:
+    image: postgres
+    hostname: database
+    environment:
+      POSTGRES_USER: postgres
+      POSTGRES_PASSWORD: postgres
+      POSTGRES_DB: filmoteka
+    ports:
+      - "5432:5432"
+    healthcheck:
+      test: ["CMD-SHELL", "pg_isready -U postgres"]
+      interval: 10s
+      timeout: 5s
+      retries: 5
+      start_period: 10s
+    volumes:
+      - ./data/init.sql:/docker-entrypoint-initdb.d/init.sql
+  # mailsender:
+  # broker:
