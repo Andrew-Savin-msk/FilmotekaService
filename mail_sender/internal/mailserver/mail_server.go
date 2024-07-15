@@ -8,11 +8,11 @@ import (
 	"os"
 	"strings"
 
-	brokerclient "github.com/Andrew-Savin-msk/filmoteka-service/mail-sender/broker_client"
-	rabbitclient "github.com/Andrew-Savin-msk/filmoteka-service/mail-sender/broker_client/rabbit_client"
+	brokerclient "github.com/Andrew-Savin-msk/filmoteka-service/mail-sender/internal/broker_client"
+	rabbitclient "github.com/Andrew-Savin-msk/filmoteka-service/mail-sender/internal/broker_client/rabbit_client"
 	"github.com/Andrew-Savin-msk/filmoteka-service/mail-sender/internal/config"
-	maildealer "github.com/Andrew-Savin-msk/filmoteka-service/mail-sender/mail_dealer"
-	gomaildealer "github.com/Andrew-Savin-msk/filmoteka-service/mail-sender/mail_dealer/go_mail_dealer"
+	maildealer "github.com/Andrew-Savin-msk/filmoteka-service/mail-sender/internal/mail_dealer"
+	gomaildealer "github.com/Andrew-Savin-msk/filmoteka-service/mail-sender/internal/mail_dealer/go_mail_dealer"
 	"github.com/sirupsen/logrus"
 )
 

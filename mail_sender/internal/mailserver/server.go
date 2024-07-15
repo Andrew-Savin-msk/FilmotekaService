@@ -5,8 +5,8 @@ import (
 	"sync"
 	"time"
 
-	brokerclient "github.com/Andrew-Savin-msk/filmoteka-service/mail-sender/broker_client"
-	maildealer "github.com/Andrew-Savin-msk/filmoteka-service/mail-sender/mail_dealer"
+	brokerclient "github.com/Andrew-Savin-msk/filmoteka-service/mail-sender/internal/broker_client"
+	maildealer "github.com/Andrew-Savin-msk/filmoteka-service/mail-sender/internal/mail_dealer"
 	"github.com/sirupsen/logrus"
 )
 

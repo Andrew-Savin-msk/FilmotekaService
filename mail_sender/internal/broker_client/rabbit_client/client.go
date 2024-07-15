@@ -3,7 +3,7 @@ package rabbitclient
 import (
 	"context"
 
-	brokerclient "github.com/Andrew-Savin-msk/filmoteka-service/mail-sender/broker_client"
+	brokerclient "github.com/Andrew-Savin-msk/filmoteka-service/mail-sender/internal/broker_client"
 	"github.com/rabbitmq/amqp091-go"
 	"github.com/sirupsen/logrus"
 )
