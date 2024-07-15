@@ -6,6 +6,8 @@ import (
 	"net/http"
 	"strings"
 
+	brockerclient "github.com/Andrew-Savin-msk/filmoteka-service/backend/internal/broker_client"
+	rabbitclient "github.com/Andrew-Savin-msk/filmoteka-service/backend/internal/broker_client/rabbit_client"
 	"github.com/Andrew-Savin-msk/filmoteka-service/backend/internal/config"
 	"github.com/Andrew-Savin-msk/filmoteka-service/backend/internal/store"
 	"github.com/Andrew-Savin-msk/filmoteka-service/backend/internal/store/pgstore"
@@ -17,6 +19,7 @@ import (
 
 var (
 	ErrDbTypeUnknown = fmt.Errorf("unknown database name")
+	ErrBcTypeUnknown     = fmt.Errorf("unknown type of broker client")
 )
 
 func Start(cfg *config.Config) error {
@@ -27,7 +30,14 @@ func Start(cfg *config.Config) error {
 	}
 	defer st.Close()
 
-	srv := newServer(st, cfg)
+	log := setLog(cfg.LogLevel)
+
+	bc, err := loadBrokerClient(cfg.BrokerType, cfg.BrokerURL, log)
+	if err != nil {
+		return fmt.Errorf("unable to load broker client. ended with error: %s", err)
+	}
+
+	srv := newServer(st, bc, log, cfg)
 
 	srv.logger.Infof("Api started work")
 	err = http.ListenAndServe(cfg.Port, srv.mux)
@@ -71,4 +81,12 @@ func loadPg(url string) (store.Store, error) {
 	}
 
 	return pgstore.New(db), nil
+}
+
+func loadBrokerClient(name, URL string, logger *logrus.Logger) (brockerclient.Client, error) {
+	switch strings.ToLower(name) {
+	case "rabbitmq", "rabbit_mq", "rabbit":
+		return rabbitclient.New(URL, logrus.NewEntry(logger))
+	}
+	return nil, ErrBcTypeUnknown
 }

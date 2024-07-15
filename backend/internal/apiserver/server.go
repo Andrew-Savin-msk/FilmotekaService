@@ -3,6 +3,7 @@ package apiserver
 import (
 	"net/http"
 
+	brockerclient "github.com/Andrew-Savin-msk/filmoteka-service/backend/internal/broker_client"
 	"github.com/Andrew-Savin-msk/filmoteka-service/backend/internal/config"
 	"github.com/Andrew-Savin-msk/filmoteka-service/backend/internal/store"
 	"github.com/gorilla/sessions"
@@ -13,15 +14,17 @@ type server struct {
 	mux          *http.ServeMux
 	sessionStore sessions.Store
 	store        store.Store
+	bc           brockerclient.Client
 	logger       *logrus.Logger
 }
 
-func newServer(st store.Store, cfg *config.Config) *server {
+func newServer(st store.Store, bc brockerclient.Client, logger *logrus.Logger, cfg *config.Config) *server {
 	srv := &server{
 		mux:          http.NewServeMux(),
-		logger:       setLog(cfg.LogLevel),
+		logger:       logger,
 		store:        st,
 		sessionStore: sessions.NewCookieStore([]byte(cfg.SessionKey)),
+		bc:           bc,
 	}
 
 	srv.setMuxer()

@@ -12,14 +12,8 @@ type UserRepository struct {
 }
 
 func (r *UserRepository) Create(u *user.User) error {
-	// Validate
-	err := u.Validate()
-	if err != nil {
-		return err
-	}
-
 	// Encrypt
-	err = u.Sequre()
+	err := u.Sequre()
 	if err != nil {
 		return err
 	}

@@ -43,7 +43,7 @@ func New(URL string, ctx context.Context, logger *logrus.Entry) (*Client, error)
 	}
 
 	q, err := ch.QueueDeclare(
-		"Temporary",
+		"emails",
 		false,
 		false,
 		false,
