@@ -1,17 +1,20 @@
 version: '3.8'
 services:
   rabbitmq:
-    image: rabbitmq:managment
+    image: rabbitmq:management
     hostname: rabbitmq
     environment:
-      RABBITMQ_DEFAULT_USER=rmuser
-      RABBITMQ_DEFAULT_PASS=rmpassword
+      RABBITMQ_DEFAULT_USER: rmuser
+      RABBITMQ_DEFAULT_PASS: rmpassword
     healthcheck:
-      test: ["CMD-SHELL", "rabbitmq-diagnostics -q ping"]
+      test: ["CMD-SHELL", "rabbitmq-diagnostics check_port_connectivity"]
       interval: 30s
-      timeout: 10s
-      retries: 5
-      start_period: 30s
+      timeout: 30s
+      retries: 1
+      start_period: 40s
+    ports:
+      - "5672:5672"
+      - "15672:15672"
   ms:
     build: .
     hostname: mail_sender

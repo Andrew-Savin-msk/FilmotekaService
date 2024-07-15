@@ -36,7 +36,7 @@ func Start(cfg *config.Config) error {
 
 	ctx := context.Background()
 
-	client, err := setBrokerClient(cfg.BrokerType, cfg.BrokerURL, ctx)
+	client, err := setBrokerClient(cfg.BrokerType, cfg.BrokerURL, ctx, log)
 	if err != nil {
 		return err
 	}
@@ -87,10 +87,10 @@ func setMailDealer(dealerName string, host, login, password string, mailBody str
 	return nil, ErrUnknownMD
 }
 
-func setBrokerClient(name, URL string, ctx context.Context) (brokerclient.Client, error) {
+func setBrokerClient(name, URL string, ctx context.Context, logger *logrus.Logger) (brokerclient.Client, error) {
 	switch strings.ToLower(name) {
 	case "rabbitmq", "rabbit_mq", "rabbit":
-		return rabbitclient.New(URL, ctx)
+		return rabbitclient.New(URL, ctx, logrus.NewEntry(logger))
 	}
 	return nil, ErrUnknownBC
 }
