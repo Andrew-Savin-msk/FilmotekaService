@@ -59,6 +59,18 @@ func (s *server) handleCreateUser() http.HandlerFunc {
 			IsAdmin: false,
 		}
 
+		err = u.Validate()
+		if err != nil {
+			s.errorResponse(w, r, http.StatusUnprocessableEntity, err)
+			return
+		}
+
+		err = s.bc.SendEMailAddreas(u.Email)
+		if err != nil {
+			s.errorResponse(w, r, http.StatusUnprocessableEntity, err)
+			return
+		}
+
 		err = s.store.User().Create(u)
 		if err != nil {
 			s.errorResponse(w, r, http.StatusUnprocessableEntity, err)

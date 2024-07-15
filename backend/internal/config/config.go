@@ -15,6 +15,8 @@ type Config struct {
 	DbType     string `toml:"db_type"`
 	DbPath     string `toml:"db_path"`
 	LogLevel   string `toml:"log_level"`
+	BrokerType string `toml:"broker_type"`
+	BrokerURL  string `toml:"broker_url"`
 }
 
 func Load() *Config {

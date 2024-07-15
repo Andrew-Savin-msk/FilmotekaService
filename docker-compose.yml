@@ -8,7 +8,9 @@ services:
     hostname: backend
     depends_on:
       database:
-          condition: service_healthy
+        condition: service_healthy
+      rabbitmq:
+        condition: service_healthy
     ports:
       - 8081:8081
   database:
@@ -28,5 +30,26 @@ services:
       start_period: 10s
     volumes:
       - ./data/init.sql:/docker-entrypoint-initdb.d/init.sql
-  # mailsender:
-  # broker:
+  rabbitmq:
+    image: rabbitmq:management
+    hostname: rabbitmq
+    environment:
+      RABBITMQ_DEFAULT_USER: rmuser
+      RABBITMQ_DEFAULT_PASS: rmpassword
+    healthcheck:
+      test: ["CMD-SHELL", "rabbitmq-diagnostics check_port_connectivity"]
+      interval: 30s
+      timeout: 30s
+      retries: 1
+      start_period: 40s
+    ports:
+      - "5672:5672"
+      - "15672:15672"
+  ms:
+    build: ./mail_sender
+    hostname: mail_sender
+    environment:
+      DOCKER_CONFIG_PATH: "config/server_docker.toml"
+    depends_on:
+      rabbitmq:
+        condition: service_healthy
