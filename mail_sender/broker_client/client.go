@@ -1,5 +1,5 @@
 package brokerclient
 
 type Client interface {
-	GetMessages() <-chan string
+	GetMessages() <-chan Message
 }

@@ -21,15 +21,17 @@ type Config struct {
 }
 
 func Load() *Config {
+	cfgPath := "DOCKER_CONFIG_PATH"
 	switch runtime.GOOS {
 	case "windows":
+		cfgPath = "CONFIG_PATH"
 		err := godotenv.Load(".env")
 		if err != nil {
 			log.Fatalf("unable to load .env file, ended with error: %s", err)
 		}
 	}
 
-	configPath := os.Getenv("CONFIG_PATH")
+	configPath := os.Getenv(cfgPath)
 	if configPath == "" {
 		log.Fatal("unable to parse enviromental parameter")
 	}

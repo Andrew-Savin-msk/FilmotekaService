@@ -22,14 +22,13 @@ var (
 )
 
 func Start(cfg *config.Config) error {
-	// TODO: Set logger
 	log := setLog(cfg.LogLevel)
-	// TODO: Parse Mail Template
+
 	body, err := loadBody(cfg.MailBodyPath)
 	if err != nil {
 		return err
 	}
-	// TODO: Chose MD
+
 	dealer, err := setMailDealer(cfg.MDType, cfg.Host, cfg.Login, cfg.Password, body)
 	if err != nil {
 		return err
@@ -37,14 +36,17 @@ func Start(cfg *config.Config) error {
 
 	ctx := context.Background()
 
-	client, err := setBrokerClient(cfg.BrokerType, cfg.BrokerURL, ctx)
+	client, err := setBrokerClient(cfg.BrokerType, cfg.BrokerURL, ctx, log)
 	if err != nil {
 		return err
 	}
 
-	// TODO: Set server struct
-	srv := newServer(log, dealer, client)
-	// TODO: Run server
+	srv := newServer(log, dealer, client, ctx)
+
+	err = srv.run()
+	if err != nil {
+		return err
+	}
 
 	return nil
 
@@ -85,10 +87,10 @@ func setMailDealer(dealerName string, host, login, password string, mailBody str
 	return nil, ErrUnknownMD
 }
 
-func setBrokerClient(name, URL string, ctx context.Context) (brokerclient.Client, error) {
+func setBrokerClient(name, URL string, ctx context.Context, logger *logrus.Logger) (brokerclient.Client, error) {
 	switch strings.ToLower(name) {
 	case "rabbitmq", "rabbit_mq", "rabbit":
-		return rabbitclient.New(URL)
+		return rabbitclient.New(URL, ctx, logrus.NewEntry(logger))
 	}
 	return nil, ErrUnknownBC
 }
