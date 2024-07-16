@@ -19,20 +19,20 @@ import (
 
 var (
 	ErrDbTypeUnknown = fmt.Errorf("unknown database name")
-	ErrBcTypeUnknown     = fmt.Errorf("unknown type of broker client")
+	ErrBcTypeUnknown = fmt.Errorf("unknown type of broker client")
 )
 
 func Start(cfg *config.Config) error {
 
-	st, err := loadStore(cfg.DbPath, cfg.DbType)
+	st, err := loadStore(cfg.Db)
 	if err != nil {
 		return fmt.Errorf("unable to init db. ended with error: %s", err)
 	}
 	defer st.Close()
 
-	log := setLog(cfg.LogLevel)
+	log := setLog(cfg.Srv.LogLevel)
 
-	bc, err := loadBrokerClient(cfg.BrokerType, cfg.BrokerURL, log)
+	bc, err := loadBrokerClient(cfg.Bc, log)
 	if err != nil {
 		return fmt.Errorf("unable to load broker client. ended with error: %s", err)
 	}
@@ -40,7 +40,7 @@ func Start(cfg *config.Config) error {
 	srv := newServer(st, bc, log, cfg)
 
 	srv.logger.Infof("Api started work")
-	err = http.ListenAndServe(cfg.Port, srv.mux)
+	err = http.ListenAndServe(cfg.Srv.Port, srv.mux)
 	if err != nil {
 		return fmt.Errorf("unable to start listening port. ended with error: %s", err)
 	}
@@ -61,10 +61,10 @@ func setLog(level string) *logrus.Logger {
 	return log
 }
 
-func loadStore(url, sType string) (store.Store, error) {
-	switch strings.ToLower(sType) {
+func loadStore(cfg config.Database) (store.Store, error) {
+	switch strings.ToLower(cfg.DbType) {
 	case "postgres", "psql", "pg4":
-		return loadPg(url)
+		return loadPg("postgresql://" + cfg.User + ":" + cfg.Password + "@" + cfg.Host + ":5432/" + cfg.DbName + "?sslmode=disable")
 	}
 	return nil, ErrDbTypeUnknown
 }
@@ -83,10 +83,10 @@ func loadPg(url string) (store.Store, error) {
 	return pgstore.New(db), nil
 }
 
-func loadBrokerClient(name, URL string, logger *logrus.Logger) (brockerclient.Client, error) {
-	switch strings.ToLower(name) {
+func loadBrokerClient(cfg config.Broker, logger *logrus.Logger) (brockerclient.Client, error) {
+	switch strings.ToLower(cfg.BrokerType) {
 	case "rabbitmq", "rabbit_mq", "rabbit":
-		return rabbitclient.New(URL, logrus.NewEntry(logger))
+		return rabbitclient.New("amqp://"+cfg.User+":"+cfg.Password+"@"+cfg.Host+":5672/", logrus.NewEntry(logger))
 	}
 	return nil, ErrBcTypeUnknown
 }

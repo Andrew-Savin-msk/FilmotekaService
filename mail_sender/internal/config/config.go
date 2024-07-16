@@ -10,14 +10,28 @@ import (
 )
 
 type Config struct {
+	Srv  Server `toml:"server"`
+	Bc   Broker `toml:"broker_client"`
+	Send Sender `toml:"mail_sender"`
+}
+
+type Server struct {
+	LogLevel string `toml:"log_level"`
+}
+
+type Broker struct {
+	BrokerType string `toml:"broker_type"`
+	User       string `toml:"user"`
+	Password   string `toml:"password"`
+	Host       string `toml:"host"`
+}
+
+type Sender struct {
 	Host         string `toml:"host"`
 	Login        string `toml:"login"`
 	Password     string `toml:"app_password"`
-	LogLevel     string `toml:"log_level"`
 	MDType       string `toml:"md_type"`
 	MailBodyPath string `toml:"body_template_path"`
-	BrokerType   string `toml:"broker_type"`
-	BrokerURL    string `toml:"broker_url"`
 }
 
 func Load() *Config {

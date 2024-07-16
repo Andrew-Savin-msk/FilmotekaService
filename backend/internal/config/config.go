@@ -10,13 +10,30 @@ import (
 )
 
 type Config struct {
+	Srv Server   `toml:"server"`
+	Db  Database `toml:"database"`
+	Bc  Broker   `toml:"broker_client"`
+}
+
+type Server struct {
 	Port       string `toml:"port"`
 	SessionKey string `toml:"session_key"`
-	DbType     string `toml:"db_type"`
-	DbPath     string `toml:"db_path"`
 	LogLevel   string `toml:"log_level"`
+}
+
+type Database struct {
+	DbType   string `toml:"db_type"`
+	User     string `toml:"user"`
+	Password string `toml:"password"`
+	Host     string `toml:"host"`
+	DbName   string `toml:"db_name"`
+}
+
+type Broker struct {
 	BrokerType string `toml:"broker_type"`
-	BrokerURL  string `toml:"broker_url"`
+	User       string `toml:"user"`
+	Password   string `toml:"password"`
+	Host       string `toml:"host"`
 }
 
 func Load() *Config {

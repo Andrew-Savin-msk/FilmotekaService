@@ -22,21 +22,16 @@ var (
 )
 
 func Start(cfg *config.Config) error {
-	log := setLog(cfg.LogLevel)
+	log := setLog(cfg.Srv.LogLevel)
 
-	body, err := loadBody(cfg.MailBodyPath)
-	if err != nil {
-		return err
-	}
-
-	dealer, err := setMailDealer(cfg.MDType, cfg.Host, cfg.Login, cfg.Password, body)
+	dealer, err := setMailDealer(cfg.Send)
 	if err != nil {
 		return err
 	}
 
 	ctx := context.Background()
 
-	client, err := setBrokerClient(cfg.BrokerType, cfg.BrokerURL, ctx, log)
+	client, err := setBrokerClient(cfg.Bc, ctx, log)
 	if err != nil {
 		return err
 	}
@@ -72,25 +67,29 @@ func loadBody(path string) (string, error) {
 		return "", err
 	}
 
-	htmlBody, err := os.ReadFile("templates/mail_body.html")
+	htmlBody, err := os.ReadFile(path)
 	if err != nil {
 		log.Fatalf("unable to load body template, ended with error: %s", err)
 	}
 	return string(htmlBody), nil
 }
 
-func setMailDealer(dealerName string, host, login, password string, mailBody string) (maildealer.MailDealer, error) {
-	switch dealerName {
+func setMailDealer(Send config.Sender) (maildealer.MailDealer, error) {
+	body, err := loadBody(Send.MailBodyPath)
+	if err != nil {
+		return nil, err
+	}
+	switch Send.MDType {
 	case "gomail", "go-mail", "go_mail":
-		return gomaildealer.New(host, 587, login, password, mailBody), nil
+		return gomaildealer.New(Send.Host, 587, Send.Login, Send.Password, body), nil
 	}
 	return nil, ErrUnknownMD
 }
 
-func setBrokerClient(name, URL string, ctx context.Context, logger *logrus.Logger) (brokerclient.Client, error) {
-	switch strings.ToLower(name) {
+func setBrokerClient(Bc config.Broker, ctx context.Context, logger *logrus.Logger) (brokerclient.Client, error) {
+	switch strings.ToLower(Bc.BrokerType) {
 	case "rabbitmq", "rabbit_mq", "rabbit":
-		return rabbitclient.New(URL, ctx, logrus.NewEntry(logger))
+		return rabbitclient.New("amqp://"+Bc.User+":"+Bc.Password+"@"+Bc.Host+":5672/", ctx, logrus.NewEntry(logger))
 	}
 	return nil, ErrUnknownBC
 }

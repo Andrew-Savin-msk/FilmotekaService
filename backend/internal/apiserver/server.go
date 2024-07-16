@@ -23,7 +23,7 @@ func newServer(st store.Store, bc brockerclient.Client, logger *logrus.Logger, c
 		mux:          http.NewServeMux(),
 		logger:       logger,
 		store:        st,
-		sessionStore: sessions.NewCookieStore([]byte(cfg.SessionKey)),
+		sessionStore: sessions.NewCookieStore([]byte(cfg.Srv.SessionKey)),
 		bc:           bc,
 	}
 

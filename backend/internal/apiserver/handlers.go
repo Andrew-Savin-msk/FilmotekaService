@@ -349,7 +349,6 @@ func (s *server) handleGetActors() http.Handler {
 		res := []respond{}
 		for actor, films := range actors {
 			res = append(res, respond{Act: actor, Films: films})
-			fmt.Println(actor, films)
 		}
 
 		s.respond(w, r, http.StatusOK, res)
