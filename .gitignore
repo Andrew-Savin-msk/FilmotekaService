@@ -1,0 +1,3 @@
+*.env
+backend/.env
+mail_sender/.env

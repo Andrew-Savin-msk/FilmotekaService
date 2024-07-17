@@ -4,8 +4,8 @@ services:
     image: rabbitmq:management
     hostname: rabbitmq
     environment:
-      RABBITMQ_DEFAULT_USER: rmuser
-      RABBITMQ_DEFAULT_PASS: rmpassword
+      RABBITMQ_DEFAULT_USER: ${RABBITMQ_DEFAULT_USER}
+      RABBITMQ_DEFAULT_PASS: ${RABBITMQ_DEFAULT_PASS}
     healthcheck:
       test: ["CMD-SHELL", "rabbitmq-diagnostics check_port_connectivity"]
       interval: 30s
@@ -19,7 +19,7 @@ services:
     build: .
     hostname: mail_sender
     environment:
-      DOCKER_CONFIG_PATH: "config/server_docker.toml"
+      DOCKER_CONFIG_PATH: ${DOCKER_CONFIG_PATH}
     depends_on:
       rabbitmq:
         condition: service_healthy

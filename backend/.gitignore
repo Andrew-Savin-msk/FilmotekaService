@@ -1,3 +1,4 @@
 *.drawio
+/configs
 /migrations_draft
-/configs/server.toml
+*.env

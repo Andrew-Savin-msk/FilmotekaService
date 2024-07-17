@@ -4,9 +4,9 @@ services:
     image: postgres
     hostname: database
     environment:
-      POSTGRES_USER: postgres
-      POSTGRES_PASSWORD: postgres
-      POSTGRES_DB: filmoteka
+      POSTGRES_USER: ${POSTGRES_USER}
+      POSTGRES_PASSWORD: ${POSTGRES_PASSWORD}
+      POSTGRES_DB: ${POSTGRES_DB}
     ports:
       - "5432:5432"
     healthcheck:
@@ -25,6 +25,6 @@ services:
     hostname: app
     environment:
     # Set only if you want to choose spicific path
-      CONFIG_PATH_DOCKER: configs/server_docker.toml
+      CONFIG_PATH_DOCKER: ${DOCKER_CONFIG_PATH}
     ports:
       - "8081:8081"
