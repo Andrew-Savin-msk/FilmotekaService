@@ -2,6 +2,7 @@ package apiserver
 
 import (
 	"context"
+	"fmt"
 	"net/http"
 	"time"
 
@@ -57,18 +58,22 @@ func (s *server) wrapLogRequest(next http.Handler) http.Handler {
 
 func (s *server) wrapAuthorise(next http.Handler) http.Handler {
 	return http.HandlerFunc(func(w http.ResponseWriter, r *http.Request) {
+		// Getting cookies
 		cookie, err := r.Cookie(sessionName)
+		fmt.Println(cookie, cookie.Name)
 		if err != nil {
 			s.errorResponse(w, r, http.StatusBadRequest, err)
 			return
 		}
 
+		// Geting session data
 		session, err := s.sessionStore.Get(r, cookie.Name)
 		if err != nil {
 			s.errorResponse(w, r, http.StatusInternalServerError, err)
 			return
 		}
 
+		// Geting session token
 		id, ok := session.Values["user_id"].(int)
 		if !ok {
 			s.errorResponse(w, r, http.StatusUnauthorized, errNotAuthenticated)

@@ -120,6 +120,7 @@ func (s *server) handleGetSession() http.HandlerFunc {
 		}
 
 		session.Values["user_id"] = u.Id
+
 		err = session.Save(r, w)
 		if err != nil {
 			s.errorResponse(w, r, http.StatusInternalServerError, err)

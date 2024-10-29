@@ -47,7 +47,7 @@ func Load() *Config {
 
 	configPath := os.Getenv(cfgPath)
 	if configPath == "" {
-		log.Fatal("unable to parse enviromental parameter")
+		log.Fatal("unable to parse environmental parameter")
 	}
 
 	_, err := os.Stat(configPath)
@@ -58,7 +58,7 @@ func Load() *Config {
 	var cfg Config
 	_, err = toml.DecodeFile(configPath, &cfg)
 	if err != nil {
-		log.Fatalf("unable to umarshal toml config file, ended with error: %s", err)
+		log.Fatalf("unable to unmarshal toml config file, ended with error: %s", err)
 	}
 	return &cfg
 }
