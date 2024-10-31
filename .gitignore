@@ -1,3 +1,6 @@
 *.env
 backend/.env
 mail_sender/.env
+backend/configs/
+mail_sender/configs/
+rabbitmq/

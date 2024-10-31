@@ -9,7 +9,9 @@ services:
     depends_on:
       database:
         condition: service_healthy
-      rabbitmq:
+      # rabbitmq:
+      #   condition: service_healthy
+      kafka:
         condition: service_healthy
     ports:
       - 8081:8081
@@ -30,26 +32,50 @@ services:
       start_period: 10s
     volumes:
       - ./data/init.sql:/docker-entrypoint-initdb.d/init.sql
-  rabbitmq:
-    image: rabbitmq:management
-    hostname: rabbitmq
+
+  zookeeper:
+    image: 'confluentinc/cp-zookeeper:latest'
     environment:
-      RABBITMQ_DEFAULT_USER: ${RABBITMQ_DEFAULT_USER}
-      RABBITMQ_DEFAULT_PASS: ${RABBITMQ_DEFAULT_PASS}
-    healthcheck:
-      test: ["CMD-SHELL", "rabbitmq-diagnostics check_port_connectivity"]
-      interval: 30s
-      timeout: 30s
-      retries: 3
-      start_period: 40s
+      ZOOKEEPER_CLIENT_PORT: 2181
+      ZOOKEEPER_TICK_TIME: 2000
+
+  kafka:
+    image: 'confluentinc/cp-kafka:latest'
+    environment:
+      KAFKA_BROKER_ID: 1
+      KAFKA_ZOOKEEPER_CONNECT: zookeeper:2181
+      KAFKA_ADVERTISED_LISTENERS: INSIDE://kafka:9092,OUTSIDE://localhost:29092
+      KAFKA_LISTENER_SECURITY_PROTOCOL_MAP: INSIDE:PLAINTEXT,OUTSIDE:PLAINTEXT
+      KAFKA_INTER_BROKER_LISTENER_NAME: INSIDE
+      KAFKA_OFFSETS_TOPIC_REPLICATION_FACTOR: 1
+      KAFKA_AUTO_CREATE_TOPICS_ENABLE: false
     ports:
-      - "5672:5672"
-      - "15672:15672"
+      - "9092:9092"
+      - "29092:29092"
+    healthcheck:
+        test: ["CMD", "bash", "-c", "kafka-broker-api-versions --bootstrap-server kafka:9092 > /dev/null 2>&1"]
+        interval: 30s
+        timeout: 10s
+        retries: 5
+    
+  kafka-setup:
+    image: 'confluentinc/cp-kafka:latest'
+    depends_on:
+      - kafka
+    entrypoint: >
+      bash -c "
+      /usr/bin/kafka-topics --create --topic ${BROKER_TOPIC_NAME}
+      --bootstrap-server kafka:9092
+      --partitions 1 --replication-factor 1
+      "
+
   ms:
     build: ./mail_sender
     hostname: mail_sender
     environment:
       DOCKER_CONFIG_PATH: ${MAIL_DOCKER_CONFIG_PATH}
     depends_on:
-      rabbitmq:
+      # rabbitmq:
+      #   condition: service_healthy
+      kafka:
         condition: service_healthy
