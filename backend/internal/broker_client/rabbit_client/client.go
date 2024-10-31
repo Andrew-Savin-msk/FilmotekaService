@@ -1,6 +1,9 @@
 package rabbitclient
 
 import (
+	"strings"
+
+	"github.com/Andrew-Savin-msk/filmoteka-service/backend/internal/config"
 	"github.com/google/uuid"
 	"github.com/rabbitmq/amqp091-go"
 	"github.com/sirupsen/logrus"
@@ -20,7 +23,9 @@ type Client struct {
 	logger *logrus.Entry
 }
 
-func New(URL string, logger *logrus.Entry) (*Client, error) {
+func New(cfg config.Broker, logger *logrus.Entry) (*Client, error) {
+	URL := "amqp://" + cfg.User + ":" + cfg.Password + "@" + cfg.Host + ":" + cfg.Port[strings.Index(cfg.Port, ":")+1:] + "/"
+
 	conn, err := amqp091.Dial(URL)
 	if err != nil {
 		return nil, err

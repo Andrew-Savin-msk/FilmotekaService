@@ -7,6 +7,7 @@ import (
 	"strings"
 
 	brockerclient "github.com/Andrew-Savin-msk/filmoteka-service/backend/internal/broker_client"
+	kafkaclient "github.com/Andrew-Savin-msk/filmoteka-service/backend/internal/broker_client/kafka_client"
 	rabbitclient "github.com/Andrew-Savin-msk/filmoteka-service/backend/internal/broker_client/rabbit_client"
 	"github.com/Andrew-Savin-msk/filmoteka-service/backend/internal/config"
 	"github.com/Andrew-Savin-msk/filmoteka-service/backend/internal/store"
@@ -86,7 +87,9 @@ func loadPg(url string) (store.Store, error) {
 func loadBrokerClient(cfg config.Broker, logger *logrus.Logger) (brockerclient.Client, error) {
 	switch strings.ToLower(cfg.BrokerType) {
 	case "rabbitmq", "rabbit_mq", "rabbit":
-		return rabbitclient.New("amqp://"+cfg.User+":"+cfg.Password+"@"+cfg.Host+":5672/", logrus.NewEntry(logger))
+		return rabbitclient.New(cfg, logrus.NewEntry(logger))
+	case "kafka", "apache-kafka", "mannaya":
+		return kafkaclient.New(cfg, logrus.NewEntry(logger))
 	}
 	return nil, ErrBcTypeUnknown
 }
