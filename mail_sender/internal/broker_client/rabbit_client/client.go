@@ -4,6 +4,7 @@ import (
 	"context"
 
 	brokerclient "github.com/Andrew-Savin-msk/filmoteka-service/mail-sender/internal/broker_client"
+	"github.com/Andrew-Savin-msk/filmoteka-service/mail-sender/internal/config"
 	"github.com/rabbitmq/amqp091-go"
 	"github.com/sirupsen/logrus"
 )
@@ -29,7 +30,9 @@ type Client struct {
 	logger *logrus.Entry
 }
 
-func New(URL string, ctx context.Context, logger *logrus.Entry) (*Client, error) {
+func New(Bc config.Broker, ctx context.Context, logger *logrus.Entry) (*Client, error) {
+	URL := "amqp://" + Bc.User + ":" + Bc.Password + "@" + Bc.Host + ":5672/"
+
 	conn, err := amqp091.Dial(URL)
 	if err != nil {
 		return nil, err
@@ -94,8 +97,8 @@ func (c *Client) messagesConvertor(res chan brokerclient.Message) {
 	for ms := range c.msgs {
 		logger := c.logger.WithField("message_uuid", ms.MessageId)
 		dto := brokerclient.Message{
-			UUID: ms.MessageId,
-			Mail: string(ms.Body),
+			UUID:  ms.MessageId,
+			Email: string(ms.Body),
 		}
 		select {
 		case <-c.ctx.Done():

@@ -89,7 +89,9 @@ func setMailDealer(Send config.Sender) (maildealer.MailDealer, error) {
 func setBrokerClient(Bc config.Broker, ctx context.Context, logger *logrus.Logger) (brokerclient.Client, error) {
 	switch strings.ToLower(Bc.BrokerType) {
 	case "rabbitmq", "rabbit_mq", "rabbit":
-		return rabbitclient.New("amqp://"+Bc.User+":"+Bc.Password+"@"+Bc.Host+":5672/", ctx, logrus.NewEntry(logger))
+		return rabbitclient.New(Bc, ctx, logrus.NewEntry(logger))
+	case "kafka", "apache-kafka", "mannaya":
+		return kafkaclient.New(Bc, ctx, logrus.NewEntry(logger))
 	}
 	return nil, ErrUnknownBC
 }

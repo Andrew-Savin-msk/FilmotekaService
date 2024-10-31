@@ -24,6 +24,8 @@ type Broker struct {
 	User       string `toml:"user"`
 	Password   string `toml:"password"`
 	Host       string `toml:"host"`
+	Port       string `toml:"port"`
+	Topic      string `toml:"topic"`
 }
 
 type Sender struct {

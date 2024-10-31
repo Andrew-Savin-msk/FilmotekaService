@@ -1,6 +1,6 @@
 package brokerclient
 
 type Message struct {
-	UUID string
-	Mail string
+	UUID  string `json:"uuid"`
+	Email string `json:"email"`
 }

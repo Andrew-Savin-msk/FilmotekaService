@@ -39,7 +39,7 @@ func (s *server) messagesSender(wg *sync.WaitGroup, input <-chan brokerclient.Me
 			s.logger.Infof("Mail service stopped work with context value: %s", s.ctx.Err())
 			return
 		default:
-			err := s.md.Send(user.Mail)
+			err := s.md.Send(user.Email)
 			if err != nil {
 				logger.Infof("unable to send email due to error: %s", err)
 			} else {
