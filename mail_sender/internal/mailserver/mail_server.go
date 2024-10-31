@@ -9,6 +9,7 @@ import (
 	"strings"
 
 	brokerclient "github.com/Andrew-Savin-msk/filmoteka-service/mail-sender/internal/broker_client"
+	kafkaclient "github.com/Andrew-Savin-msk/filmoteka-service/mail-sender/internal/broker_client/kafka_client"
 	rabbitclient "github.com/Andrew-Savin-msk/filmoteka-service/mail-sender/internal/broker_client/rabbit_client"
 	"github.com/Andrew-Savin-msk/filmoteka-service/mail-sender/internal/config"
 	maildealer "github.com/Andrew-Savin-msk/filmoteka-service/mail-sender/internal/mail_dealer"

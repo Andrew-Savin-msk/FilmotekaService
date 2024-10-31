@@ -2,6 +2,7 @@ package kafkaclient
 
 import (
 	"context"
+	"encoding/json"
 	"strings"
 
 	brokerclient "github.com/Andrew-Savin-msk/filmoteka-service/mail-sender/internal/broker_client"
@@ -12,7 +13,10 @@ import (
 
 type Client struct {
 	topic    string
-	consumer sarama.Consumer
+	conn     sarama.Consumer
+	consumer sarama.PartitionConsumer
+
+	brokerMessages <-chan *sarama.ConsumerMessage
 
 	logger *logrus.Entry
 
@@ -23,15 +27,23 @@ func New(Bc config.Broker, ctx context.Context, logger *logrus.Entry) (*Client, 
 
 	URL := Bc.Host + ":" + Bc.Port[strings.Index(Bc.Port, ":")+1:]
 
-	consumer, err := sarama.NewConsumer([]string{URL}, nil)
+	conn, err := sarama.NewConsumer([]string{URL}, nil)
+	if err != nil {
+		return nil, err
+	}
+
+	consumer, err := conn.ConsumePartition(Bc.Topic, 0, sarama.OffsetNewest)
 	if err != nil {
 		return nil, err
 	}
 
 	return &Client{
-		topic:    Bc.Topic,
-		consumer: consumer,
-		logger:   logger,
+		topic:          Bc.Topic,
+		conn:           conn,
+		consumer:       consumer,
+		brokerMessages: consumer.Messages(),
+		logger:         logger,
+		ctx:            ctx,
 	}, nil
 }
 
@@ -43,6 +55,21 @@ func (c *Client) GetMessages() <-chan brokerclient.Message {
 	return msg
 }
 
-func (c *Client) messagesConvertor(chan brokerclient.Message) {
+func (c *Client) messagesConvertor(output chan brokerclient.Message) {
+	for {
+		select {
+		case <-c.ctx.Done():
+			return
+		case msg := <-c.brokerMessages:
+			res := brokerclient.Message{}
 
+			err := json.Unmarshal(msg.Value, &res)
+			if err != nil {
+				c.logger.Errorf("unable to unmarshal data error: %s timestamp: %v", err, msg.Timestamp)
+			} else {
+				c.logger.Errorf("successfully handled message with timestamp: %v", msg.Timestamp)
+				output <- res
+			}
+		}
+	}
 }
