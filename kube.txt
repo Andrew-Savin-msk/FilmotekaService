@@ -1,4 +1,7 @@
 
-kubectl create configmap backend-config-toml --from-file=./backend/configs/config.toml -n filmoteka
+kubectl create configmap backend-config-toml --from-file=./backend/configs/bconfig.toml -n filmoteka
 
-kubectl create configmap mail-sender-config-toml --from-file=./mail_sender/configs/config.toml -n filmoteka
+kubectl create configmap mail-sender-config-toml --from-file=./mail_sender/configs/msconfig.toml -n filmoteka
+
+kubectl create configmap db-init-sql --from-file=./data/init.sql -n filmoteka
+
