@@ -1,0 +1,183 @@
+apiVersion: v1
+kind: ConfigMap
+metadata:
+  name: kafka-config
+  namespace: filmoteka
+data:
+  ZOOKEEPER_CLIENT_PORT: "2181"
+  ZOOKEEPER_TICK_TIME: "2000"
+  KAFKA_BROKER_ID: "1"
+  KAFKA_ZOOKEEPER_CONNECT: "localhost:2181"
+  KAFKA_ADVERTISED_LISTENERS: "INSIDE://kafka:9092,OUTSIDE://localhost:29092"
+  KAFKA_LISTENER_SECURITY_PROTOCOL_MAP: "INSIDE:PLAINTEXT,OUTSIDE:PLAINTEXT"
+  KAFKA_INTER_BROKER_LISTENER_NAME: "INSIDE"
+  KAFKA_OFFSETS_TOPIC_REPLICATION_FACTOR: "1"
+  KAFKA_AUTO_CREATE_TOPICS_ENABLE: "false"
+---
+apiVersion: apps/v1
+kind: Deployment
+metadata:
+  name: filmoteka-broker
+  namespace: filmoteka
+spec:
+  replicas: 1
+  selector:
+    matchLabels:
+      app: broker
+  template:
+    metadata:
+      labels:
+        app: broker
+    spec:
+      containers:
+      - name: zookeeper
+        image: confluentinc/cp-zookeeper:latest
+        envFrom:
+        - configMapRef:
+            name: kafka-config
+        ports:
+        - containerPort: 2181
+      - name: kafka
+        image: confluentinc/cp-kafka:latest
+        envFrom:
+        - configMapRef:
+            name: kafka-config
+        ports:
+        - containerPort: 9092
+        - containerPort: 29092
+      - name: kafka-setup
+        image: confluentinc/cp-kafka:latest
+        command:
+          - "bash"
+          - "-c"
+          - |
+            sleep 10;  # Задержка для ожидания готовности Kafka
+            /usr/bin/kafka-topics --create --topic example-topic \
+            --bootstrap-server localhost:9092 \
+            --partitions 1 --replication-factor 1
+        envFrom:
+        - configMapRef:
+            name: kafka-config
+---
+apiVersion: v1
+kind: ConfigMap
+metadata:
+  name: go-config
+  namespace: filmoteka
+data:
+  BACK_DOCKER_CONFIG_PATH: "configs/config.toml"
+  POSTGRES_USER: "user"
+  POSTGRES_PASSWORD: "passwd"
+  POSTGRES_DB: "filmoteka"
+  MAIL_DOCKER_CONFIG_PATH: "configs/config.toml"
+  BROKER_USER: "user"
+  BROKER_PASSWORD: "passwd"
+  BROKER_TOPIC_NAME: "email"
+---
+apiVersion: apps/v1
+kind: Deployment
+metadata:
+  name: filmoteka-db
+  namespace: filmoteka
+spec:
+  replicas: 1
+  selector:
+    matchLabels:
+      app: db
+  template:
+    metadata:
+      labels:
+        app: db
+    spec:
+      containers:
+      - name: db
+        image: postgres:latest
+        envFrom:
+        - configMapRef:
+            name: go-config
+        ports:
+        - containerPort: 5432
+        # volumeMounts:
+        # - name: config-volume
+        #   mountPath: /docker-entrypoint-initdb.d/init.sql
+        #   subPath: init.sql
+      # volumes:
+      # - name: config-volume
+      #   hostPath:
+      #     path: /data/init.sql
+      #     type: File
+---
+apiVersion: v1
+kind: Service
+metadata:
+  name: filmoteka-db
+  namespace: filmoteka
+spec:
+  ports:
+    - port: 5432
+  selector:
+    app: db
+---
+apiVersion: apps/v1
+kind: Deployment
+metadata:
+  name: filmoteca-backend
+  namespace: filmoteka
+spec:
+  replicas: 1
+  selector:
+    matchLabels:
+      app: backend
+  template:
+    metadata:
+      labels:
+        app: backend
+    spec:
+      containers:
+      - name: backend
+        image: werrer/filmoteka-api:v1.0
+        ports:
+          - containerPort: 8081
+        envFrom:
+        - configMapRef:
+            name: go-config
+        volumeMounts:
+        - name: config-volume
+          mountPath: /configs/config.toml
+          subPath: config.toml  
+      volumes:
+      - name: config-volume
+        configMap:
+          name: backend-config-toml
+---
+apiVersion: apps/v1
+kind: Deployment
+metadata:
+  name: filmoteca-mail-sender
+  namespace: filmoteka
+spec:
+  replicas: 1
+  selector:
+    matchLabels:
+      app: mail-sender
+  template:
+    metadata:
+      labels:
+        app: mail-sender
+    spec:
+      containers:
+      - name: mail-sender
+        image: werrer/filmoteka-mail-sender:v1.0
+        ports:
+          - containerPort: 8081
+        envFrom:
+        - configMapRef:
+            name: go-config
+        volumeMounts:
+        - name: config-volume
+          mountPath: /configs/config.toml
+          subPath: config.toml  
+      volumes:
+      - name: config-volume
+        configMap:
+          name: mail-sender-config-toml

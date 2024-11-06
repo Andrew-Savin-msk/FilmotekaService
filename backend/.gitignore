@@ -2,3 +2,4 @@
 /configs
 /migrations_draft
 *.env
+migrations_docker
