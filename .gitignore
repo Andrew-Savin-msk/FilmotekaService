@@ -4,4 +4,4 @@ mail_sender/.env
 backend/configs/
 mail_sender/configs/
 rabbitmq/
-# k8s
+*.txt
