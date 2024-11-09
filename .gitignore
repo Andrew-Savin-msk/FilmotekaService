@@ -5,3 +5,6 @@ backend/configs/
 mail_sender/configs/
 rabbitmq/
 *.txt
+k8s/deployment.yaml
+mail_sender/docker-compose.yml
+backend/docker-compose.yml

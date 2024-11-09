@@ -24,7 +24,7 @@ func (d *Dealer) Send(recipient string) error {
 	mess := gomail.NewMessage()
 	mess.SetHeader("Subject", "Welcome to Our Service!")
 	mess.SetHeader("From", d.author)
-	mess.SetBody("text/html", strings.ReplaceAll(string(d.mail_body), "[USER_NAME]", d.md.Username))
+	mess.SetBody("text/html", strings.ReplaceAll(string(d.mail_body), "[USER_NAME]", recipient))
 	mess.SetAddressHeader("To", recipient, recipient)
 	err := d.md.DialAndSend(mess)
 	if err != nil {

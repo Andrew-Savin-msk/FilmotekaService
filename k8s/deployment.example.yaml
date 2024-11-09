@@ -12,7 +12,6 @@ data:
   KAFKA_LISTENER_SECURITY_PROTOCOL_MAP: "INSIDE:PLAINTEXT,OUTSIDE:PLAINTEXT"
   KAFKA_INTER_BROKER_LISTENER_NAME: "INSIDE"
   KAFKA_OFFSETS_TOPIC_REPLICATION_FACTOR: "1"
-  # KAFKA_AUTO_CREATE_TOPICS_ENABLE: "false"
   KAFKA_AUTO_CREATE_TOPICS_ENABLE: "true"
 ---
 apiVersion: apps/v1
@@ -46,31 +45,6 @@ spec:
         ports:
         - containerPort: 9092
         - containerPort: 29092
-      # - name: kafka-setup
-      #   image: confluentinc/cp-kafka:latest
-      #   command:
-      #     - "bash"
-      #     - "-c"
-      #     - |
-      #       sleep 10;  # Задержка для ожидания готовности Kafka
-      #       /usr/bin/kafka-topics --create --topic email \
-      #       --bootstrap-server kafka:9092 \
-      #       --partitions 1 --replication-factor 1
-      #   envFrom:
-      #   - configMapRef:
-      #       name: kafka-config
----
-apiVersion: v1
-kind: Service
-metadata:
-  name: filmoteka-broker
-  namespace: filmoteka
-spec:
-  ports:
-    - port: 29092
-      targetPort: 29092
-  selector:
-    app: broker
 ---
 apiVersion: v1
 kind: Service
@@ -80,10 +54,6 @@ metadata:
 spec:
   type: NodePort
   ports:
-    - name: kafka-outside
-      port: 29092
-      targetPort: 29092
-      nodePort: 32092
     - name: kafka-inside
       port: 9092
       targetPort: 9092
@@ -96,9 +66,9 @@ metadata:
   name: db-config
   namespace: filmoteka
 data:
-  POSTGRES_USER: "user"
-  POSTGRES_PASSWORD: "passwd"
-  POSTGRES_DB: "filmoteka"
+  POSTGRES_USER: "<database_username>"
+  POSTGRES_PASSWORD: "<database_user_password>"
+  POSTGRES_DB: "<database_name>"
 ---
 apiVersion: apps/v1
 kind: Deployment
@@ -150,10 +120,7 @@ metadata:
   name: back-config
   namespace: filmoteka
 data:
-  DOCKER_CONFIG_PATH: "/configs/bconfig.toml"
-  BROKER_USER: "user"
-  BROKER_PASSWORD: "passwd"
-  BROKER_TOPIC_NAME: "email"
+  DOCKER_CONFIG_PATH: "<path_to_config_file>"
 ---
 apiVersion: apps/v1
 kind: Deployment
@@ -180,26 +147,25 @@ spec:
             name: back-config
         volumeMounts:
         - name: config-volume
-          mountPath: /configs/
-          # subPath: bconfig.toml  
+          mountPath: <path_to_configs_directory>
       volumes:
       - name: config-volume
         configMap:
           name: backend-config-toml
 ---
-apiVersion: v1               # Версия API Kubernetes, используемая для создания объекта (в данном случае Service).
-kind: Service                # Тип ресурса Kubernetes – это Service (сервис), обеспечивающий доступ к подам внутри кластера.
+apiVersion: v1
+kind: Service
 metadata:
-  name: filmoteca-backend-service  # Имя сервиса. С ним можно будет обращаться к сервису в пределах кластера.
-  namespace: filmoteka       # Пространство имён (namespace), в котором создан сервис.
+  name: filmoteca-backend-service
+  namespace: filmoteka
 spec:
-  type: NodePort             # Тип сервиса. NodePort делает сервис доступным извне через определённый порт на узле кластера.
+  type: NodePort
   selector:
-    app: backend             # Селектор, указывающий, к каким подам привязывается сервис. Подходит к подам с меткой `app: backend`.
+    app: backend
   ports:
-    - port: 8081             # Внутренний порт сервиса в кластере. На него можно обращаться из других подов и сервисов внутри кластера.
-      targetPort: 8081       # Порт контейнера, к которому перенаправляется трафик. Это тот порт, на котором приложение слушает внутри контейнера.
-      nodePort: 30081        # Порт на узле (хосте), открытый для внешнего трафика. Доступен из-за пределов кластера и перенаправляется на `targetPort` контейнера.
+    - port: 8081
+      targetPort: 8081
+      nodePort: 30081
 ---
 apiVersion: v1
 kind: ConfigMap
@@ -207,10 +173,7 @@ metadata:
   name: mail-sender-config
   namespace: filmoteka
 data:
-  DOCKER_CONFIG_PATH: "/configs/msconfig.toml"
-  BROKER_USER: "user"
-  BROKER_PASSWORD: "passwd"
-  BROKER_TOPIC_NAME: "email"
+  DOCKER_CONFIG_PATH: "<path_to_config_file>"
 ---
 apiVersion: apps/v1
 kind: Deployment
@@ -237,8 +200,7 @@ spec:
             name: mail-sender-config
         volumeMounts:
         - name: config-volume
-          mountPath: /configs/
-          # subPath: msconfig.toml  
+          mountPath: <path_to_configs_directory>
       volumes:
       - name: config-volume
         configMap:
