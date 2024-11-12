@@ -6,7 +6,7 @@
 
 - **FilmotekaApi**: Сервис для работы с базой данных и бизнес-логикой.
 - **Mail Sender**: Сервис для отправки приветственных писем новым пользователям с использованием библиотеки `gomail`.
-- **RApache-Kafka**: Брокер сообщений, соединяющий FilmotekaApi и Mail Sender.
+- **Apache-Kafka**: Брокер сообщений, соединяющий FilmotekaApi и Mail Sender.
 - **Frontend**: Визуальное представление нашего сервиса.
 - **PostgreSQL**: База данных с таблицами `users`, `films`, `actors`, `actors_films`.
 
@@ -116,10 +116,50 @@ BROKER_USER="<логин_пользователя_брокера>"
 BROKER_PASSWORD="<пароль_пользователя_брокера>"
 ```
 
-Создайте по шаблонам описанным выше конфигурационные пути
+Создайте по шаблонам описанным выше конфигурационные файлы и примонтируйте их по пути указанному в переменных среды с окончанием *_DOCKER_CONFIG_PATH.
 
 Далее используйте данную команду:
 
 ```bash
 docker-compose up --build
 ```
+
+## Запуск на базе Kubernetes:
+
+Создайте namespace с названием filmoteka:
+   ```bash
+   kubectl create configmap backend-config-toml --from-file=<относительный_путь_до_конфигурационного_файла> -n filmoteka
+   ```
+
+Создайте нижеперечисленные ConfigMap для хранения и монтирования:
+
+1) Конфигурационного файла bakend:
+   ```bash
+   kubectl create configmap backend-config-toml --from-file=<относительный_путь_до_конфигурационного_файла> -n filmoteka
+   ```
+
+2) конфигурационного файла mail_sender:
+   ```bash
+   kubectl create configmap mail-sender-config-toml --from-file=<относительный_путь_до_конфигурационного_файла> -n filmoteka
+   ```
+
+3) Скрипта инициализации базы данных:
+   ```bash
+   kubectl create configmap db-init-sql --from-file=./data/init.sql -n filmoteka
+   ```
+
+4) Шаблона для письма:
+   ```bash
+   kubectl create configmap mail-body-template --from-file=./mail_sender/templates/mail_body.html -n filmoteka
+   ```
+
+Заполните переменные среды которые указывают в шаблоне путь до места монтирования конфигурационных файлов, они описаны по шаблону `<*>`
+
+Запустите файл deployments.example.yaml, предварительно переименовав в deployments.yaml:
+   ```bash
+   kubectl apply -f ./k8s/deployments.yaml
+   ```
+
+## Использование проекта
+
+После успешного запуска проекта он будет доступен по адресу `http://localhost:8081`
