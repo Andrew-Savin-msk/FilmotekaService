@@ -139,7 +139,7 @@ spec:
     spec:
       containers:
       - name: backend
-        image: werrer/filmoteka-api:v1.0
+        image: werrer/filmoteka-api:latest
         ports:
           - containerPort: 8081
         envFrom:
@@ -192,7 +192,7 @@ spec:
     spec:
       containers:
       - name: mail-sender
-        image: werrer/filmoteka-mail-sender:v1.0
+        image: werrer/filmoteka-mail-sender:latest
         ports:
           - containerPort: 8081
         envFrom:
