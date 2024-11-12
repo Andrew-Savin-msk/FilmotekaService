@@ -128,7 +128,7 @@ docker-compose up --build
 
 Создайте namespace с названием filmoteka:
    ```bash
-   kubectl create configmap backend-config-toml --from-file=<относительный_путь_до_конфигурационного_файла> -n filmoteka
+   kubectl create namespace filmoteka
    ```
 
 Создайте нижеперечисленные ConfigMap для хранения и монтирования:
