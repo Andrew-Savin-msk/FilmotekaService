@@ -45,6 +45,31 @@ spec:
         ports:
         - containerPort: 9092
         - containerPort: 29092
+      # - name: kafka-setup
+      #   image: confluentinc/cp-kafka:latest
+      #   command:
+      #     - "bash"
+      #     - "-c"
+      #     - |
+      #       sleep 10;  # Задержка для ожидания готовности Kafka
+      #       /usr/bin/kafka-topics --create --topic email \
+      #       --bootstrap-server kafka:9092 \
+      #       --partitions 1 --replication-factor 1
+      #   envFrom:
+      #   - configMapRef:
+      #       name: kafka-config
+# ---
+# apiVersion: v1
+# kind: Service
+# metadata:
+#   name: filmoteka-broker
+#   namespace: filmoteka
+# spec:
+#   ports:
+#     - port: 29092
+#       targetPort: 29092
+#   selector:
+#     app: broker
 ---
 apiVersion: v1
 kind: Service
@@ -66,9 +91,9 @@ metadata:
   name: db-config
   namespace: filmoteka
 data:
-  POSTGRES_USER: "<database_username>"
-  POSTGRES_PASSWORD: "<database_user_password>"
-  POSTGRES_DB: "<database_name>"
+  POSTGRES_USER: "user"
+  POSTGRES_PASSWORD: "passwd"
+  POSTGRES_DB: "filmoteka"
 ---
 apiVersion: apps/v1
 kind: Deployment
@@ -139,7 +164,7 @@ spec:
     spec:
       containers:
       - name: backend
-        image: werrer/filmoteka-api:latest
+        image: werrer/filmoteka-api:v1.1
         ports:
           - containerPort: 8081
         envFrom:
@@ -148,6 +173,7 @@ spec:
         volumeMounts:
         - name: config-volume
           mountPath: <path_to_configs_directory>
+          # subPath: bconfig.toml  
       volumes:
       - name: config-volume
         configMap:
@@ -192,7 +218,7 @@ spec:
     spec:
       containers:
       - name: mail-sender
-        image: werrer/filmoteka-mail-sender:latest
+        image: werrer/filmoteka-mail-sender:v1.1
         ports:
           - containerPort: 8081
         envFrom:
@@ -201,7 +227,13 @@ spec:
         volumeMounts:
         - name: config-volume
           mountPath: <path_to_configs_directory>
+          # subPath: msconfig.toml
+        - name: mail-body-template
+          mountPath: /templates/
       volumes:
       - name: config-volume
         configMap:
           name: mail-sender-config-toml
+      - name: mail-body-template
+        configMap:
+          name: mail-body-template
