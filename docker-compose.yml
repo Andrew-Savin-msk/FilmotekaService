@@ -2,7 +2,8 @@ version: '3.8'
 services:
   # front:
   back:
-    build: ./backend
+    # build: ./backend
+    image: werrer/filmoteka-api:v1.1 
     environment:
       DOCKER_CONFIG_PATH: ${BACK_DOCKER_CONFIG_PATH}
     hostname: backend
@@ -15,6 +16,8 @@ services:
         condition: service_healthy
     ports:
       - 8081:8081
+    volumes:
+      - ./backend/configs/config.toml:/configs/config.toml
   database:
     image: postgres
     hostname: database
@@ -22,8 +25,8 @@ services:
       POSTGRES_USER: ${POSTGRES_USER}
       POSTGRES_PASSWORD: ${POSTGRES_PASSWORD}
       POSTGRES_DB: ${POSTGRES_DB}
-    ports:
-      - "5432:5432"
+    # ports:
+    #   - "5432:5432"
     healthcheck:
       test: ["CMD-SHELL", "pg_isready -d ${POSTGRES_DB} -U ${POSTGRES_USER}"]
       interval: 10s
@@ -70,7 +73,8 @@ services:
       "
 
   ms:
-    build: ./mail_sender
+    # build: ./mail_sender
+    image: werrer/filmoteka-mail-sender:v1.1 
     hostname: mail_sender
     environment:
       DOCKER_CONFIG_PATH: ${MAIL_DOCKER_CONFIG_PATH}
@@ -79,3 +83,6 @@ services:
       #   condition: service_healthy
       kafka:
         condition: service_healthy
+    volumes:
+      - ./mail_sender/configs/config.toml:/configs/config.toml
+      - ./mail_sender/templates/mail_body.html:/templates/mail_body.html
