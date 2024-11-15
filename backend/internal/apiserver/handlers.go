@@ -2,9 +2,9 @@ package apiserver
 
 import (
 	"encoding/json"
-	"errors"
 	"fmt"
 	"net/http"
+	"strconv"
 	"time"
 
 	model "github.com/Andrew-Savin-msk/filmoteka-service/backend/internal/model"
@@ -13,6 +13,7 @@ import (
 	user "github.com/Andrew-Savin-msk/filmoteka-service/backend/internal/model/user"
 	"github.com/Andrew-Savin-msk/filmoteka-service/backend/internal/store"
 	validation "github.com/go-ozzo/ozzo-validation"
+	"github.com/gorilla/mux"
 )
 
 const (
@@ -22,14 +23,6 @@ const (
 
 var (
 	sessionName = "user-key"
-)
-
-var (
-	errIncorrectEmailOrPassword = errors.New("incorrect email or password")
-	errNotAuthenticated         = errors.New("not auntificated")
-	errResourceForbiden         = errors.New("you dont have permossions to get this resource")
-	errIncorrectId              = errors.New("presented incorrect id type")
-	errMethodNotAllowed         = errors.New("unsuportable method type")
 )
 
 // handleCreateUser creates a new user.
@@ -200,23 +193,24 @@ func (s *server) handleCreateActor() http.HandlerFunc {
 
 // handleGetActor returns information about a specific actor by ID.
 func (s *server) handleGetActor() http.Handler {
-	type request struct {
-		Id int `json:"id"`
-	}
 	return http.HandlerFunc(func(w http.ResponseWriter, r *http.Request) {
 		if r.Method != http.MethodGet {
 			s.errorResponse(w, r, http.StatusMethodNotAllowed, errMethodNotAllowed)
 			return
 		}
 
-		req := &request{}
-		err := json.NewDecoder(r.Body).Decode(req)
-		if err != nil {
-			s.errorResponse(w, r, http.StatusBadRequest, err)
-			return
+		sActorId, ok := mux.Vars(r)["actorId"]
+		var actorId int64 = -1
+		var err error
+		if len(sActorId) != 0 || !ok {
+			actorId, err = strconv.ParseInt(sActorId, 10, 32)
+			if err != nil || actorId < 0 {
+				s.errorResponse(w, r, http.StatusBadRequest, ErrInvalidQuerryParams)
+				return
+			}
 		}
 
-		act, err := s.store.Actor().Find(req.Id)
+		act, err := s.store.Actor().Find(int(actorId))
 		if err != nil {
 			s.errorResponse(w, r, http.StatusUnprocessableEntity, err)
 			return
@@ -228,22 +222,23 @@ func (s *server) handleGetActor() http.Handler {
 
 // handleDeleteActor deletes an actor by ID.
 func (s *server) handleDeleteActor() http.Handler {
-	type request struct {
-		Id int `json:"id"`
-	}
 	return http.HandlerFunc(func(w http.ResponseWriter, r *http.Request) {
 		if r.Method != http.MethodDelete {
 			s.errorResponse(w, r, http.StatusMethodNotAllowed, errMethodNotAllowed)
 			return
 		}
-		req := &request{}
-		err := json.NewDecoder(r.Body).Decode(req)
-		if err != nil {
-			s.errorResponse(w, r, http.StatusBadRequest, err)
-			return
+		sActorId, ok := mux.Vars(r)["actorId"]
+		var actorId int64 = -1
+		var err error
+		if len(sActorId) != 0 || !ok {
+			actorId, err = strconv.ParseInt(sActorId, 10, 32)
+			if err != nil || actorId < 0 {
+				s.errorResponse(w, r, http.StatusBadRequest, ErrInvalidQuerryParams)
+				return
+			}
 		}
 
-		id, err := s.store.Actor().Delete(req.Id)
+		id, err := s.store.Actor().Delete(int(actorId))
 		if err != nil {
 			if err == store.ErrRecordNotFound {
 				s.respond(w, r, http.StatusOK, id)
@@ -258,7 +253,6 @@ func (s *server) handleDeleteActor() http.Handler {
 // handleOverwrightActor updates information about an existing actor by ID.
 func (s *server) handleOverwrightActor() http.Handler {
 	type request struct {
-		Id        int    `json:"id"`
 		Name      string `json:"name"`
 		Gen       string `json:"gender"`
 		Birthdate string `json:"birthdate"`
@@ -275,8 +269,18 @@ func (s *server) handleOverwrightActor() http.Handler {
 			return
 		}
 
+		sActorId, ok := mux.Vars(r)["actorId"]
+		var actorId int64 = -1
+		if len(sActorId) != 0 || !ok {
+			actorId, err = strconv.ParseInt(sActorId, 10, 32)
+			if err != nil || actorId < 0 {
+				s.errorResponse(w, r, http.StatusBadRequest, ErrInvalidQuerryParams)
+				return
+			}
+		}
+
 		act := &actor.Actor{
-			Id:   req.Id,
+			Id:   int(actorId),
 			Name: req.Name,
 			Gen:  req.Gen,
 		}
@@ -407,23 +411,24 @@ func (s *server) handleCreateFilm() http.Handler {
 
 // handleDeleteFilm deletes a film by ID.
 func (s *server) handleDeleteFilm() http.Handler {
-	type request struct {
-		Id int `json:"id"`
-	}
 	return http.HandlerFunc(func(w http.ResponseWriter, r *http.Request) {
 		if r.Method != http.MethodDelete {
 			s.errorResponse(w, r, http.StatusMethodNotAllowed, errMethodNotAllowed)
 			return
 		}
 
-		req := &request{}
-		err := json.NewDecoder(r.Body).Decode(req)
-		if err != nil {
-			s.errorResponse(w, r, http.StatusBadRequest, err)
-			return
+		sFilmId, ok := mux.Vars(r)["actorId"]
+		var filmId int64 = -1
+		var err error
+		if len(sFilmId) != 0 || !ok {
+			filmId, err = strconv.ParseInt(sFilmId, 10, 32)
+			if err != nil || filmId < 0 {
+				s.errorResponse(w, r, http.StatusBadRequest, ErrInvalidQuerryParams)
+				return
+			}
 		}
 
-		id, err := s.store.Film().Delete(req.Id)
+		id, err := s.store.Film().Delete(int(filmId))
 		if err != nil {
 			s.errorResponse(w, r, http.StatusInternalServerError, err)
 			return
@@ -436,7 +441,6 @@ func (s *server) handleDeleteFilm() http.Handler {
 // handleOverwrightFilm updates information about an existing film by ID.
 func (s *server) handleOverwrightFilm() http.Handler {
 	type request struct {
-		Id        int     `json:"id"`
 		Name      string  `json:"name"`
 		Desc      string  `json:"description"`
 		Date      string  `json:"release_date"`
@@ -454,8 +458,18 @@ func (s *server) handleOverwrightFilm() http.Handler {
 			return
 		}
 
+		sFilmId, ok := mux.Vars(r)["actorId"]
+		var filmId int64 = -1
+		if len(sFilmId) != 0 || !ok {
+			filmId, err = strconv.ParseInt(sFilmId, 10, 32)
+			if err != nil || filmId < 0 {
+				s.errorResponse(w, r, http.StatusBadRequest, ErrInvalidQuerryParams)
+				return
+			}
+		}
+
 		film := &film.Film{
-			Id:        req.Id,
+			Id:        int(filmId),
 			Name:      req.Name,
 			Desc:      req.Desc,
 			Assesment: req.Assesment,

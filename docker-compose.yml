@@ -3,7 +3,7 @@ services:
   # front:
   back:
     # build: ./backend
-    image: werrer/filmoteka-api:v1.1 
+    image: werrer/filmoteka-api:v1.2 
     environment:
       DOCKER_CONFIG_PATH: ${BACK_DOCKER_CONFIG_PATH}
     hostname: backend
