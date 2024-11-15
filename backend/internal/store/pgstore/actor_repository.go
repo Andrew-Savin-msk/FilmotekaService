@@ -70,7 +70,7 @@ func (a *ActorRepository) Delete(id int) (int, error) {
 	return int(rows), nil
 }
 
-func (a *ActorRepository) Overwright(act *actor.Actor) error {
+func (a *ActorRepository) Overwrite(act *actor.Actor) error {
 	res, err := a.st.db.Exec(
 		"UPDATE actors SET "+
 			"gender = CASE WHEN gender <> $1 AND $1 <> '' THEN $1 ELSE gender END, "+
@@ -98,10 +98,12 @@ func (a *ActorRepository) Overwright(act *actor.Actor) error {
 	return nil
 }
 
-func (a *ActorRepository) GetActorsWithFilms() (map[*actor.Actor][]*film.Film, error) {
+func (a *ActorRepository) GetActorsWithFilms(limit, offset int64) (map[*actor.Actor][]*film.Film, error) {
 	result := map[*actor.Actor][]*film.Film{}
 	rows, err := a.st.db.Query(
-		"SELECT id, name, gender, birthdate FROM actors LIMIT 5",
+		"SELECT id, name, gender, birthdate FROM actors LIMIT $1 OFFSET $2;",
+		limit,
+		offset,
 	)
 	if err != nil {
 		return nil, err
@@ -114,6 +116,7 @@ func (a *ActorRepository) GetActorsWithFilms() (map[*actor.Actor][]*film.Film, e
 		if err != nil {
 			return nil, err
 		}
+		// TODO:
 		films, err := a.st.FilmActor().GetActorsFilms(actor.Id)
 		if err != nil {
 			return nil, err

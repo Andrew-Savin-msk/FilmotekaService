@@ -68,9 +68,9 @@ func TestOverwrightActor(t *testing.T) {
 	assert.NoError(t, err)
 	assert.NotNil(t, ta)
 
-	err = st.Actor().Overwright(ta)
+	err = st.Actor().Overwrite(ta)
 	assert.NoError(t, err)
 
-	err = st.Actor().Overwright(ta)
+	err = st.Actor().Overwrite(ta)
 	assert.Equal(t, err, store.ErrRecordNotFound)
 }

@@ -242,16 +242,18 @@ func (s *server) handleDeleteActor() http.Handler {
 		if err != nil {
 			if err == store.ErrRecordNotFound {
 				s.respond(w, r, http.StatusOK, id)
+				return
 			}
 			s.errorResponse(w, r, http.StatusBadRequest, err)
+			return
 		}
 
 		s.respond(w, r, http.StatusOK, id)
 	})
 }
 
-// handleOverwrightActor updates information about an existing actor by ID.
-func (s *server) handleOverwrightActor() http.Handler {
+// handleOverwriteActor updates information about an existing actor by ID.
+func (s *server) handleOverwriteActor() http.Handler {
 	type request struct {
 		Name      string `json:"name"`
 		Gen       string `json:"gender"`
@@ -318,7 +320,7 @@ func (s *server) handleOverwrightActor() http.Handler {
 			}
 		}
 
-		err = s.store.Actor().Overwright(act)
+		err = s.store.Actor().Overwrite(act)
 		if err != nil {
 			if err == store.ErrRecordNotFound {
 				s.respond(w, r, http.StatusOK, "")
@@ -345,7 +347,28 @@ func (s *server) handleGetActors() http.Handler {
 			return
 		}
 
-		actors, err := s.store.Actor().GetActorsWithFilms()
+		limitStr := r.URL.Query().Get("limit")
+		var limit int64 = 5
+		var err error
+		if len(limitStr) != 0 {
+			limit, err = strconv.ParseInt(limitStr, 10, 32)
+			if err != nil || limit < 0 {
+				s.errorResponse(w, r, http.StatusBadRequest, ErrInvalidQuerryParams)
+				return
+			}
+		}
+
+		offsetStr := r.URL.Query().Get("offset")
+		var offset int64 = 5
+		if len(offsetStr) != 0 {
+			offset, err = strconv.ParseInt(offsetStr, 10, 32)
+			if err != nil || offset < 0 {
+				s.errorResponse(w, r, http.StatusBadRequest, ErrInvalidQuerryParams)
+				return
+			}
+		}
+
+		actors, err := s.store.Actor().GetActorsWithFilms(limit, offset)
 		if err != nil {
 			s.errorResponse(w, r, http.StatusInternalServerError, err)
 			return
@@ -417,7 +440,7 @@ func (s *server) handleDeleteFilm() http.Handler {
 			return
 		}
 
-		sFilmId, ok := mux.Vars(r)["actorId"]
+		sFilmId, ok := mux.Vars(r)["filmId"]
 		var filmId int64 = -1
 		var err error
 		if len(sFilmId) != 0 || !ok {
@@ -438,8 +461,8 @@ func (s *server) handleDeleteFilm() http.Handler {
 	})
 }
 
-// handleOverwrightFilm updates information about an existing film by ID.
-func (s *server) handleOverwrightFilm() http.Handler {
+// handleOverwriteFilm updates information about an existing film by ID.
+func (s *server) handleOverwriteFilm() http.Handler {
 	type request struct {
 		Name      string  `json:"name"`
 		Desc      string  `json:"description"`
@@ -458,7 +481,7 @@ func (s *server) handleOverwrightFilm() http.Handler {
 			return
 		}
 
-		sFilmId, ok := mux.Vars(r)["actorId"]
+		sFilmId, ok := mux.Vars(r)["filmId"]
 		var filmId int64 = -1
 		if len(sFilmId) != 0 || !ok {
 			filmId, err = strconv.ParseInt(sFilmId, 10, 32)
@@ -508,7 +531,7 @@ func (s *server) handleOverwrightFilm() http.Handler {
 			}
 		}
 
-		err = s.store.Film().Overwright(film)
+		err = s.store.Film().Overwrite(film)
 		if err != nil {
 			if err == store.ErrRecordNotFound {
 				s.respond(w, r, http.StatusOK, "")
@@ -539,7 +562,27 @@ func (s *server) handleFindFilmByNamePart() http.Handler {
 			return
 		}
 
-		film, err := s.store.Film().FindByNamePart(req.NamePart)
+		limitStr := r.URL.Query().Get("limit")
+		var limit int64 = 5
+		if len(limitStr) != 0 {
+			limit, err = strconv.ParseInt(limitStr, 10, 32)
+			if err != nil || limit < 0 {
+				s.errorResponse(w, r, http.StatusBadRequest, ErrInvalidQuerryParams)
+				return
+			}
+		}
+
+		offsetStr := r.URL.Query().Get("offset")
+		var offset int64 = 5
+		if len(offsetStr) != 0 {
+			offset, err = strconv.ParseInt(offsetStr, 10, 32)
+			if err != nil || offset < 0 {
+				s.errorResponse(w, r, http.StatusBadRequest, ErrInvalidQuerryParams)
+				return
+			}
+		}
+
+		films, err := s.store.Film().FindByNamePart(limit, offset, req.NamePart)
 		if err != nil {
 			if err == store.ErrRecordNotFound {
 				s.respond(w, r, http.StatusOK, struct{}{})
@@ -549,7 +592,7 @@ func (s *server) handleFindFilmByNamePart() http.Handler {
 			return
 		}
 
-		s.respond(w, r, http.StatusOK, film)
+		s.respond(w, r, http.StatusOK, films)
 	})
 }
 
@@ -557,7 +600,6 @@ func (s *server) handleFindFilmByNamePart() http.Handler {
 func (s *server) handleGetSortedFilms() http.Handler {
 	type request struct {
 		SortParam string `json:"sorting_parameter"`
-		Amount    int    `json:"amount"`
 	}
 	return http.HandlerFunc(func(w http.ResponseWriter, r *http.Request) {
 		if r.Method != http.MethodGet {
@@ -572,7 +614,27 @@ func (s *server) handleGetSortedFilms() http.Handler {
 			return
 		}
 
-		films, err := s.store.Film().FindAndSort(req.SortParam, req.Amount)
+		limitStr := r.URL.Query().Get("limit")
+		var limit int64 = 5
+		if len(limitStr) != 0 {
+			limit, err = strconv.ParseInt(limitStr, 10, 32)
+			if err != nil || limit < 0 {
+				s.errorResponse(w, r, http.StatusBadRequest, ErrInvalidQuerryParams)
+				return
+			}
+		}
+
+		offsetStr := r.URL.Query().Get("offset")
+		var offset int64 = 5
+		if len(offsetStr) != 0 {
+			offset, err = strconv.ParseInt(offsetStr, 10, 32)
+			if err != nil || offset < 0 {
+				s.errorResponse(w, r, http.StatusBadRequest, ErrInvalidQuerryParams)
+				return
+			}
+		}
+
+		films, err := s.store.Film().FindAndSort(limit, offset, req.SortParam)
 		if err != nil {
 			s.errorResponse(w, r, http.StatusBadRequest, err)
 			return

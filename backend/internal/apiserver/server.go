@@ -39,9 +39,9 @@ func (s *server) setMuxer() {
 	s.mux.Handle("/register", s.handleCreateUser())
 	s.mux.Handle("/authorize", s.handleGetSession())
 	s.mux.Handle("/get-actor/{actorId}", s.handleGetActor())
-	s.mux.Handle("/get-actors", s.handleGetActors())
-	s.mux.Handle("/films", s.handleFindFilmByNamePart())
-	s.mux.Handle("/select-films", s.handleGetSortedFilms())
+	s.mux.Handle("/get-actors", s.handleGetActors())        // TODO: Pagination (offset, limit)
+	s.mux.Handle("/films", s.handleFindFilmByNamePart())    // TODO: Pagination (offset, limit)
+	s.mux.Handle("/select-films", s.handleGetSortedFilms()) // TODO: Pagination (offset, limit)
 
 	// Authorisation required endpoints
 	private := s.mux.NewRoute().Subrouter()
@@ -53,8 +53,8 @@ func (s *server) setMuxer() {
 	// Admin rights required endpoints
 	admin.Handle("/private/create-actor", s.handleCreateActor())
 	admin.Handle("/private/delete-actor/{actorId}", s.handleDeleteActor())
-	admin.Handle("/private/update-actor{actorId}", s.handleOverwrightActor())
+	admin.Handle("/private/update-actor{actorId}", s.handleOverwriteActor())
 	admin.Handle("/private/post-film", s.handleCreateFilm())
 	admin.Handle("/private/delete-film/{filmId}", s.handleDeleteFilm())
-	admin.Handle("/private/update-film/{filmId}", s.handleOverwrightFilm())
+	admin.Handle("/private/update-film/{filmId}", s.handleOverwriteFilm())
 }

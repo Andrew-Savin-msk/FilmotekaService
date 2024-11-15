@@ -68,7 +68,7 @@ func (f *FilmRepository) Delete(id int) (int, error) {
 	return int(am), nil
 }
 
-func (f *FilmRepository) Overwright(film *film.Film) error {
+func (f *FilmRepository) Overwrite(film *film.Film) error {
 	res, err := f.st.db.Exec(
 		"UPDATE films SET "+
 			"name = CASE WHEN name <> $1 AND $1 <> '' THEN $1 ELSE name END, "+
@@ -98,29 +98,43 @@ func (f *FilmRepository) Overwright(film *film.Film) error {
 	return nil
 }
 
-func (f *FilmRepository) FindByNamePart(namePart string) (*film.Film, error) {
-	film := &film.Film{}
-	err := f.st.db.QueryRow(
+func (f *FilmRepository) FindByNamePart(limit, offset int64, namePart string) ([]*film.Film, error) {
+	films := []*film.Film{}
+	rows, err := f.st.db.Query(
 		"SELECT id, name, description, release_date, assesment FROM films "+
-			"WHERE name LIKE '%' || $1 || '%'",
+			"WHERE name LIKE '%' || $1 || '%' LIMIT $2 OFFSET $3;",
 		namePart,
-	).Scan(
-		&film.Id,
-		&film.Name,
-		&film.Desc,
-		&film.Date,
-		&film.Assesment,
+		limit,
+		offset,
 	)
 	if err != nil {
 		if err == sql.ErrNoRows {
-			return film, store.ErrRecordNotFound
+			return films, store.ErrRecordNotFound
 		}
 		return nil, err
 	}
-	return film, nil
+
+	for rows.Next() {
+		film := &film.Film{}
+		err = rows.Scan(
+			&film.Id,
+			&film.Name,
+			&film.Desc,
+			&film.Date,
+			&film.Assesment,
+		)
+		if err != nil {
+			if err == sql.ErrNoRows {
+				return films, store.ErrRecordNotFound
+			}
+			return nil, err
+		}
+	}
+
+	return films, nil
 }
 
-func (f *FilmRepository) FindAndSort(field string, amount int) ([]*film.Film, error) {
+func (f *FilmRepository) FindAndSort(limit, offset int64, field string) ([]*film.Film, error) {
 	films := []*film.Film{}
 	if field != "name" && field != "release_date" && field != "assesment" {
 		return films, store.ErrForbiddenParameters
@@ -129,9 +143,10 @@ func (f *FilmRepository) FindAndSort(field string, amount int) ([]*film.Film, er
 	rows, err := f.st.db.Query(
 		"SELECT id, name, description, release_date, assesment FROM films "+
 			"ORDER BY $1 DESC "+
-			"LIMIT $2",
+			"LIMIT $2 OFFSET $3;",
 		field,
-		amount,
+		limit,
+		offset,
 	)
 
 	if err != nil {
