@@ -1,4 +1,4 @@
-package services
+package service
 
 import (
 	actor "github.com/Andrew-Savin-msk/filmoteka-service/backend/internal/model/actor"
@@ -16,7 +16,7 @@ type Actors interface {
 	GetById(id int64) (*actor.Actor, error)
 	Delete(id int64) error
 	Overwrite(actor *actor.Actor) error
-	GetInfo(limit, offset int64)
+	GetInfo(limit, offset int64) (map[*actor.Actor][]*film.Film, error)
 }
 
 type Films interface {
@@ -24,5 +24,5 @@ type Films interface {
 	Delete(id int64) error
 	Overwrite(film *film.Film) error
 	FindByNamePart(limit, offset int64, namePart string) ([]*film.Film, error)
-	FindAndSort(limit, offset int64, sortParameter string)
+	GetSortedBy(limit, offset int64, sortParameter string) ([]*film.Film, error)
 }
