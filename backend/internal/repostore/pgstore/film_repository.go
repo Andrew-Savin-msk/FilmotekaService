@@ -5,7 +5,7 @@ import (
 	"fmt"
 
 	film "github.com/Andrew-Savin-msk/filmoteka-service/backend/internal/model/film"
-	"github.com/Andrew-Savin-msk/filmoteka-service/backend/internal/store"
+	"github.com/Andrew-Savin-msk/filmoteka-service/backend/internal/repostore"
 )
 
 type FilmRepository struct {
@@ -62,7 +62,7 @@ func (f *FilmRepository) Delete(id int) (int, error) {
 		return -1, err
 	}
 	if am == 0 {
-		return -1, store.ErrRecordNotFound
+		return -1, repostore.ErrRecordNotFound
 	}
 
 	return int(am), nil
@@ -92,7 +92,7 @@ func (f *FilmRepository) Overwrite(film *film.Film) error {
 		return err
 	}
 	if rows == 0 {
-		return store.ErrRecordNotFound
+		return repostore.ErrRecordNotFound
 	}
 
 	return nil
@@ -109,7 +109,7 @@ func (f *FilmRepository) FindByNamePart(limit, offset int64, namePart string) ([
 	)
 	if err != nil {
 		if err == sql.ErrNoRows {
-			return films, store.ErrRecordNotFound
+			return films, repostore.ErrRecordNotFound
 		}
 		return nil, err
 	}
@@ -125,7 +125,7 @@ func (f *FilmRepository) FindByNamePart(limit, offset int64, namePart string) ([
 		)
 		if err != nil {
 			if err == sql.ErrNoRows {
-				return films, store.ErrRecordNotFound
+				return films, repostore.ErrRecordNotFound
 			}
 			return nil, err
 		}
@@ -137,7 +137,7 @@ func (f *FilmRepository) FindByNamePart(limit, offset int64, namePart string) ([
 func (f *FilmRepository) FindAndSort(limit, offset int64, field string) ([]*film.Film, error) {
 	films := []*film.Film{}
 	if field != "name" && field != "release_date" && field != "assesment" {
-		return films, store.ErrForbiddenParameters
+		return films, repostore.ErrForbiddenParameters
 	}
 
 	rows, err := f.st.db.Query(

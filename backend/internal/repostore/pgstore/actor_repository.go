@@ -5,7 +5,7 @@ import (
 
 	actor "github.com/Andrew-Savin-msk/filmoteka-service/backend/internal/model/actor"
 	film "github.com/Andrew-Savin-msk/filmoteka-service/backend/internal/model/film"
-	"github.com/Andrew-Savin-msk/filmoteka-service/backend/internal/store"
+	"github.com/Andrew-Savin-msk/filmoteka-service/backend/internal/repostore"
 )
 
 type ActorRepository struct {
@@ -44,7 +44,7 @@ func (a *ActorRepository) Find(id int) (*actor.Actor, error) {
 	)
 	if err != nil {
 		if err == sql.ErrNoRows {
-			return nil, store.ErrRecordNotFound
+			return nil, repostore.ErrRecordNotFound
 		}
 		return nil, err
 	}
@@ -65,7 +65,7 @@ func (a *ActorRepository) Delete(id int) (int, error) {
 		return -1, err
 	}
 	if rows == 0 {
-		return -1, store.ErrRecordNotFound
+		return -1, repostore.ErrRecordNotFound
 	}
 	return int(rows), nil
 }
@@ -92,7 +92,7 @@ func (a *ActorRepository) Overwrite(act *actor.Actor) error {
 		return err
 	}
 	if rows == 0 {
-		return store.ErrRecordNotFound
+		return repostore.ErrRecordNotFound
 	}
 
 	return nil

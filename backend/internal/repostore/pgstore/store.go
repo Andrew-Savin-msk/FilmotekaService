@@ -3,7 +3,7 @@ package pgstore
 import (
 	"database/sql"
 
-	"github.com/Andrew-Savin-msk/filmoteka-service/backend/internal/store"
+	"github.com/Andrew-Savin-msk/filmoteka-service/backend/internal/repostore"
 )
 
 type Store struct {
@@ -24,7 +24,7 @@ func (s Store) Close() {
 	s.db.Close()
 }
 
-func (s *Store) User() store.UserRepository {
+func (s *Store) User() repostore.UserRepository {
 	if s.ur == nil {
 		s.ur = &UserRepository{
 			st: s,
@@ -33,7 +33,7 @@ func (s *Store) User() store.UserRepository {
 	return s.ur
 }
 
-func (s *Store) Actor() store.ActorRepository {
+func (s *Store) Actor() repostore.ActorRepository {
 	if s.ar == nil {
 		s.ar = &ActorRepository{
 			st: s,
@@ -42,7 +42,7 @@ func (s *Store) Actor() store.ActorRepository {
 	return s.ar
 }
 
-func (s *Store) Film() store.FilmRepository {
+func (s *Store) Film() repostore.FilmRepository {
 	if s.fr == nil {
 		s.fr = &FilmRepository{
 			st: s,
@@ -51,7 +51,7 @@ func (s *Store) Film() store.FilmRepository {
 	return s.fr
 }
 
-func (s *Store) FilmActor() store.FilmActorRepository {
+func (s *Store) FilmActor() repostore.FilmActorRepository {
 	if s.far == nil {
 		s.far = &FilmActorRepository{
 			st: s,

@@ -4,7 +4,7 @@ import (
 	"database/sql"
 
 	user "github.com/Andrew-Savin-msk/filmoteka-service/backend/internal/model/user"
-	"github.com/Andrew-Savin-msk/filmoteka-service/backend/internal/store"
+	"github.com/Andrew-Savin-msk/filmoteka-service/backend/internal/repostore"
 )
 
 type UserRepository struct {
@@ -41,7 +41,7 @@ func (r *UserRepository) Find(id int) (*user.User, error) {
 	)
 	if err != nil {
 		if err == sql.ErrNoRows {
-			return nil, store.ErrRecordNotFound
+			return nil, repostore.ErrRecordNotFound
 		}
 		return nil, err
 	}
@@ -62,7 +62,7 @@ func (r *UserRepository) FindByEmail(email string) (*user.User, error) {
 	)
 	if err != nil {
 		if err == sql.ErrNoRows {
-			return nil, store.ErrRecordNotFound
+			return nil, repostore.ErrRecordNotFound
 		}
 		return nil, err
 	}

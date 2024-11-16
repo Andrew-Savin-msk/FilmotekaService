@@ -4,8 +4,8 @@ import (
 	"testing"
 
 	actor "github.com/Andrew-Savin-msk/filmoteka-service/backend/internal/model/actor"
-	"github.com/Andrew-Savin-msk/filmoteka-service/backend/internal/store"
-	"github.com/Andrew-Savin-msk/filmoteka-service/backend/internal/store/pgstore"
+	"github.com/Andrew-Savin-msk/filmoteka-service/backend/internal/repostore"
+	"github.com/Andrew-Savin-msk/filmoteka-service/backend/internal/repostore/pgstore"
 	"github.com/stretchr/testify/assert"
 )
 
@@ -53,7 +53,7 @@ func TestDeleteActor(t *testing.T) {
 	assert.Equal(t, id, ta.Id)
 
 	tmp, err := st.Actor().Find(ta.Id)
-	assert.Equal(t, err, store.ErrRecordNotFound)
+	assert.Equal(t, err, repostore.ErrRecordNotFound)
 	assert.Nil(t, tmp)
 }
 
@@ -72,5 +72,5 @@ func TestOverwrightActor(t *testing.T) {
 	assert.NoError(t, err)
 
 	err = st.Actor().Overwrite(ta)
-	assert.Equal(t, err, store.ErrRecordNotFound)
+	assert.Equal(t, err, repostore.ErrRecordNotFound)
 }

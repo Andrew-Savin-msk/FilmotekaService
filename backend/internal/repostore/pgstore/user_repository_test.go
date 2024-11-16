@@ -4,7 +4,7 @@ import (
 	"testing"
 
 	user "github.com/Andrew-Savin-msk/filmoteka-service/backend/internal/model/user"
-	"github.com/Andrew-Savin-msk/filmoteka-service/backend/internal/store/pgstore"
+	"github.com/Andrew-Savin-msk/filmoteka-service/backend/internal/repostore/pgstore"
 	"github.com/stretchr/testify/assert"
 )
 
