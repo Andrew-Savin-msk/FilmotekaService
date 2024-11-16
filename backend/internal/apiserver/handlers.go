@@ -11,7 +11,7 @@ import (
 	actor "github.com/Andrew-Savin-msk/filmoteka-service/backend/internal/model/actor"
 	film "github.com/Andrew-Savin-msk/filmoteka-service/backend/internal/model/film"
 	user "github.com/Andrew-Savin-msk/filmoteka-service/backend/internal/model/user"
-	"github.com/Andrew-Savin-msk/filmoteka-service/backend/internal/store"
+	"github.com/Andrew-Savin-msk/filmoteka-service/backend/internal/repostore"
 	validation "github.com/go-ozzo/ozzo-validation"
 	"github.com/gorilla/mux"
 )
@@ -240,7 +240,7 @@ func (s *server) handleDeleteActor() http.Handler {
 
 		id, err := s.store.Actor().Delete(int(actorId))
 		if err != nil {
-			if err == store.ErrRecordNotFound {
+			if err == repostore.ErrRecordNotFound {
 				s.respond(w, r, http.StatusOK, id)
 				return
 			}
@@ -322,7 +322,7 @@ func (s *server) handleOverwriteActor() http.Handler {
 
 		err = s.store.Actor().Overwrite(act)
 		if err != nil {
-			if err == store.ErrRecordNotFound {
+			if err == repostore.ErrRecordNotFound {
 				s.respond(w, r, http.StatusOK, "")
 				return
 			}
@@ -533,7 +533,7 @@ func (s *server) handleOverwriteFilm() http.Handler {
 
 		err = s.store.Film().Overwrite(film)
 		if err != nil {
-			if err == store.ErrRecordNotFound {
+			if err == repostore.ErrRecordNotFound {
 				s.respond(w, r, http.StatusOK, "")
 				return
 			}
@@ -584,7 +584,7 @@ func (s *server) handleFindFilmByNamePart() http.Handler {
 
 		films, err := s.store.Film().FindByNamePart(limit, offset, req.NamePart)
 		if err != nil {
-			if err == store.ErrRecordNotFound {
+			if err == repostore.ErrRecordNotFound {
 				s.respond(w, r, http.StatusOK, struct{}{})
 				return
 			}

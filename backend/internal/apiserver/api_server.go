@@ -10,8 +10,8 @@ import (
 	kafkaclient "github.com/Andrew-Savin-msk/filmoteka-service/backend/internal/broker_client/kafka_client"
 	rabbitclient "github.com/Andrew-Savin-msk/filmoteka-service/backend/internal/broker_client/rabbit_client"
 	"github.com/Andrew-Savin-msk/filmoteka-service/backend/internal/config"
-	"github.com/Andrew-Savin-msk/filmoteka-service/backend/internal/store"
-	"github.com/Andrew-Savin-msk/filmoteka-service/backend/internal/store/pgstore"
+	"github.com/Andrew-Savin-msk/filmoteka-service/backend/internal/repostore"
+	"github.com/Andrew-Savin-msk/filmoteka-service/backend/internal/repostore/pgstore"
 	_ "github.com/golang-migrate/migrate/v4/database/postgres"
 
 	_ "github.com/lib/pq"
@@ -62,7 +62,7 @@ func setLog(level string) *logrus.Logger {
 	return log
 }
 
-func loadStore(cfg config.Database) (store.Store, error) {
+func loadStore(cfg config.Database) (repostore.Store, error) {
 	switch strings.ToLower(cfg.DbType) {
 	case "postgres", "psql", "pg4":
 		return loadPg("postgresql://" + cfg.User + ":" + cfg.Password + "@" + cfg.Host + ":5432/" + cfg.DbName + "?sslmode=disable")
@@ -70,7 +70,7 @@ func loadStore(cfg config.Database) (store.Store, error) {
 	return nil, ErrDbTypeUnknown
 }
 
-func loadPg(url string) (store.Store, error) {
+func loadPg(url string) (repostore.Store, error) {
 	db, err := sql.Open("postgres", url)
 	if err != nil {
 		return nil, fmt.Errorf("open: %v", err)

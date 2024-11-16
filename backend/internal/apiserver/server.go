@@ -3,7 +3,7 @@ package apiserver
 import (
 	brockerclient "github.com/Andrew-Savin-msk/filmoteka-service/backend/internal/broker_client"
 	"github.com/Andrew-Savin-msk/filmoteka-service/backend/internal/config"
-	"github.com/Andrew-Savin-msk/filmoteka-service/backend/internal/store"
+	"github.com/Andrew-Savin-msk/filmoteka-service/backend/internal/repostore"
 	"github.com/gorilla/mux"
 	"github.com/gorilla/sessions"
 	"github.com/sirupsen/logrus"
@@ -12,12 +12,12 @@ import (
 type server struct {
 	mux          *mux.Router
 	sessionStore sessions.Store
-	store        store.Store
+	store        repostore.Store
 	bc           brockerclient.Client
 	logger       *logrus.Logger
 }
 
-func newServer(st store.Store, bc brockerclient.Client, logger *logrus.Logger, cfg *config.Config) *server {
+func newServer(st repostore.Store, bc brockerclient.Client, logger *logrus.Logger, cfg *config.Config) *server {
 	srv := &server{
 		mux:          mux.NewRouter(),
 		logger:       logger,
