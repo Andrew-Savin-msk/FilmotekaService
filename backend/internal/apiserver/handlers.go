@@ -210,7 +210,7 @@ func (s *server) handleGetActor() http.Handler {
 			}
 		}
 
-		act, err := s.store.Actor().Find(int(actorId))
+		act, err := s.store.Actor().Find(actorId)
 		if err != nil {
 			s.errorResponse(w, r, http.StatusUnprocessableEntity, err)
 			return
@@ -238,7 +238,7 @@ func (s *server) handleDeleteActor() http.Handler {
 			}
 		}
 
-		id, err := s.store.Actor().Delete(int(actorId))
+		id, err := s.store.Actor().Delete(actorId)
 		if err != nil {
 			if err == repostore.ErrRecordNotFound {
 				s.respond(w, r, http.StatusOK, id)
@@ -282,7 +282,7 @@ func (s *server) handleOverwriteActor() http.Handler {
 		}
 
 		act := &actor.Actor{
-			Id:   int(actorId),
+			Id:   actorId,
 			Name: req.Name,
 			Gen:  req.Gen,
 		}
@@ -451,7 +451,7 @@ func (s *server) handleDeleteFilm() http.Handler {
 			}
 		}
 
-		id, err := s.store.Film().Delete(int(filmId))
+		id, err := s.store.Film().Delete(filmId)
 		if err != nil {
 			s.errorResponse(w, r, http.StatusInternalServerError, err)
 			return
@@ -492,7 +492,7 @@ func (s *server) handleOverwriteFilm() http.Handler {
 		}
 
 		film := &film.Film{
-			Id:        int(filmId),
+			Id:        filmId,
 			Name:      req.Name,
 			Desc:      req.Desc,
 			Assesment: req.Assesment,

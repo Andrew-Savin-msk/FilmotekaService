@@ -48,7 +48,7 @@ func (f *FilmRepository) CreateAndConnectActors(film *film.Film, actors []int) e
 	return nil
 }
 
-func (f *FilmRepository) Delete(id int) (int, error) {
+func (f *FilmRepository) Delete(id int64) (int64, error) {
 	res, err := f.st.db.Exec(
 		"DELETE FROM films WHERE id = $1",
 		id,
@@ -65,7 +65,7 @@ func (f *FilmRepository) Delete(id int) (int, error) {
 		return -1, repostore.ErrRecordNotFound
 	}
 
-	return int(am), nil
+	return am, nil
 }
 
 func (f *FilmRepository) Overwrite(film *film.Film) error {

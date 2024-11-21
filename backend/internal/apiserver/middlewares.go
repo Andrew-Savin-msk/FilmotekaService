@@ -74,7 +74,7 @@ func (s *server) wrapAuthorise(next http.Handler) http.Handler {
 		}
 
 		// Geting session token
-		id, ok := session.Values["user_id"].(int)
+		id, ok := session.Values["user_id"].(int64)
 		if !ok {
 			s.errorResponse(w, r, http.StatusUnauthorized, errNotAuthenticated)
 			return

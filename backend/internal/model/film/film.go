@@ -8,7 +8,7 @@ import (
 )
 
 type Film struct {
-	Id        int       `json:"id"`
+	Id        int64     `json:"id"`
 	Name      string    `json:"name"`
 	Desc      string    `json:"description,omitempty"`
 	Date      time.Time `json:"release_date"`

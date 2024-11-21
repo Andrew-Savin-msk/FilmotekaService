@@ -29,7 +29,7 @@ func (a *ActorRepository) Create(act *actor.Actor) error {
 	)
 }
 
-func (a *ActorRepository) Find(id int) (*actor.Actor, error) {
+func (a *ActorRepository) Find(id int64) (*actor.Actor, error) {
 	act := &actor.Actor{
 		Id: id,
 	}
@@ -51,7 +51,7 @@ func (a *ActorRepository) Find(id int) (*actor.Actor, error) {
 	return act, nil
 }
 
-func (a *ActorRepository) Delete(id int) (int, error) {
+func (a *ActorRepository) Delete(id int64) (int64, error) {
 	res, err := a.st.db.Exec(
 		"DELETE FROM actors WHERE id = $1",
 		id,
@@ -67,7 +67,7 @@ func (a *ActorRepository) Delete(id int) (int, error) {
 	if rows == 0 {
 		return -1, repostore.ErrRecordNotFound
 	}
-	return int(rows), nil
+	return rows, nil
 }
 
 func (a *ActorRepository) Overwrite(act *actor.Actor) error {

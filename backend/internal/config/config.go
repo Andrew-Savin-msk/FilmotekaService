@@ -51,7 +51,7 @@ func Load() *Config {
 
 	configPath := os.Getenv(envParamName)
 	if configPath == "" {
-		log.Fatal("Enviromental variable doen't exists!")
+		log.Fatal("Enviromental variable doesn't exists!")
 	}
 
 	_, err := os.Stat(configPath)

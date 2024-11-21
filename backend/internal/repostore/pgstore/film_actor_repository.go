@@ -12,7 +12,7 @@ type FilmActorRepository struct {
 }
 
 // Doesn't forget rollback in any error case
-func (far *FilmActorRepository) CreateConnections(tx *sql.Tx, actors []int, filmId int) error {
+func (far *FilmActorRepository) CreateConnections(tx *sql.Tx, actors []int, filmId int64) error {
 	stmt, err := tx.Prepare("INSERT INTO films_actors (film_id, actor_id) VALUES ($1, $2)")
 	// No rollback due to no changes
 	if err != nil {
@@ -38,7 +38,7 @@ func (far *FilmActorRepository) CreateConnections(tx *sql.Tx, actors []int, film
 }
 
 // TODO:
-func (far *FilmActorRepository) GetActorsFilms(id int) ([]*film.Film, error) {
+func (far *FilmActorRepository) GetActorsFilms(id int64) ([]*film.Film, error) {
 	films := []*film.Film{}
 	rows, err := far.st.db.Query(
 		"SELECT f.id, f.name, f.description, f.release_date, f.assesment FROM films_actors AS fa "+

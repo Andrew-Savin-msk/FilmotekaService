@@ -27,7 +27,7 @@ func (r *UserRepository) Create(u *user.User) error {
 	).Scan(&u.Id)
 }
 
-func (r *UserRepository) Find(id int) (*user.User, error) {
+func (r *UserRepository) Find(id int64) (*user.User, error) {
 	u := &user.User{
 		Id: id,
 	}
