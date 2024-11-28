@@ -79,7 +79,7 @@
   body_template_path = "<относительный_путь_от_папки_сервиса_до_шаблона_письма>"
 ```
 
-### RabbitMQ
+### Apache-Kafka
 
 **Описание**: Брокер сообщений для связи между FilmotekaApi и Mail Sender.
 
@@ -118,13 +118,41 @@ BROKER_PASSWORD="<пароль_пользователя_брокера>"
 
 Создайте по шаблонам описанным выше конфигурационные файлы и примонтируйте их по пути указанному в переменных среды с окончанием *_DOCKER_CONFIG_PATH.
 
-Далее используйте данную команду:
+**С использованием Taskfile:**
+
+```bash
+task dev-up
+```
+
+**С использованием cli docker:**
 
 ```bash
 docker-compose up --build
 ```
 
 ## Запуск на базе Kubernetes:
+
+**С использованием Taskfile:**
+
+1) Создание окружения:
+
+  ```bash
+  task set-prod-environment
+  ```
+
+2) Создание конфигурационных файлов:
+  
+  ```bash
+  task create-prod-configs
+  ```
+
+3) Деплой приложения:
+
+  ```bash
+  task prod-up
+  ```
+
+**С использованием kubectl:**
 
 Создайте namespace с названием filmoteka:
    ```bash
