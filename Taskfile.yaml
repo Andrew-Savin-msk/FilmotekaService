@@ -1,0 +1,39 @@
+version: '3'
+tasks:
+  dev-up:
+    cmds:
+      - docker compose up -d --build
+
+  dev-down:
+    cmds:
+      - docker compose down
+
+  set-prod-environment:
+    cmds:
+      - kubectl create namespace filmoteka
+      - kubectl config set-context --current --namespace=filmoteka
+
+  prod-up:
+    cmds:
+      - kubectl apply -f {{.deployment}} -n filmoteka
+    vars:
+      deployment: ./k8s/deployment.yaml
+
+  prod-down:
+    cmds:
+      - kubectl delete deployments filmoteka-backend filmoteka-mail-sender filmoteka-broker filmoteka-db -n filmoteka
+
+  create-prod-configs:
+    cmds:
+      - kubectl create configmap backend-config-toml --from-file={{.backend}} -n filmoteka
+      - kubectl create configmap mail-sender-config-toml --from-file={{.mail_sender}} -n filmoteka
+      - kubectl create configmap db-init-sql --from-file={{.db_init_script}} -n filmoteka
+      - kubectl create configmap mail-body-template --from-file={{.mail_body}} -n filmoteka
+    vars:
+      backend: ./backend/configs/bconfig.toml
+      mail_sender: ./mail_sender/configs/msconfig.toml
+      mail_body: ./mail_sender/templates/mail_body.html
+      db_init_script: ./data/init.sql
+  delete-prod-configs:
+    cmds:
+            - kubectl delete configmaps backend-config-toml mail-sender-config-toml db-init-sql mail-body-template -n filmoteka
