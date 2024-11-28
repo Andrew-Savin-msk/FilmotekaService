@@ -34,6 +34,12 @@ tasks:
       mail_sender: ./mail_sender/configs/msconfig.toml
       mail_body: ./mail_sender/templates/mail_body.html
       db_init_script: ./data/init.sql
+  
   delete-prod-configs:
     cmds:
-            - kubectl delete configmaps backend-config-toml mail-sender-config-toml db-init-sql mail-body-template -n filmoteka
+      - kubectl delete configmaps backend-config-toml mail-sender-config-toml db-init-sql mail-body-template -n filmoteka
+
+  prod-clear:
+    cmds:
+      - kubectl delete namespaces filmoteka
+      - kubectl config set-context --current --namespace=default
